@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h> // For strdup()
 
 #include "qtest/testsuite.h"
 #include "unittest_p.h"
@@ -13,7 +14,7 @@ qunittest_t * create_qunittest(char * label) {
         exit(-1);
     }
 
-    unittest->label = label;
+    unittest->label = strdup(label);
     unittest->length = 0;
     unittest->first = NULL;
     return unittest;

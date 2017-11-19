@@ -50,7 +50,9 @@ int destroyFilter( firFilter *filter ) {
 
 int setCoefficients( firFilter *filter, int samplerate, double cutoff, double q );
 
-double *getCoefficients( firFilter *filter );
+double *getCoefficients( firFilter *filter ) {
+    return filter->coeffs;
+}
 
 #ifdef FILTER_TESTS
 

@@ -6,9 +6,10 @@
 //
 
 #include <stdio.h>
+#include "enums.h"
 
 int main(int argc, const char * argv[]) {
     // insert code here...
     printf("Hello, World!\n");
-    return 0;
+    return NO_ERR;
 }

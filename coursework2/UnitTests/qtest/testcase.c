@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h> // For strdup()
 
 #include "qtest/testsuite.h"
 #include "testcase_p.h"
@@ -12,7 +13,7 @@ qtestcase_t * create_qtestcase(char * label) {
         exit(-1);
     }
 
-    testcase->label = label;
+    testcase->label = strdup(label);
     testcase->result = FAILED;
     testcase->next = NULL;
     return testcase;

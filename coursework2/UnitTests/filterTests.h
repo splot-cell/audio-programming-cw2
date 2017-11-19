@@ -26,44 +26,24 @@ void createFilter_returnsPointerToFilter( qunittest_t *test ) {
 }
 
 
-void destroyFilter_returnsZero( qunittest_t *test ) {
+void destroyFilter_returnsCorrectArg( qunittest_t *test ) {
     firFilter *filter = createFilter( 1 );
-    bool retVal = false;
+    qtest_assert_true( destroyFilter( filter ) == 0, "Destroy filter returns 0", test );
     
-    if ( destroyFilter( filter ) == 0 )
-        retVal = true;
+    qtest_assert_true( destroyFilter( NULL ) == -1, "Destroy filter returns -1", test );
     
-    qtest_assert_true( retVal, "Destroy filter returns 0", test );
-}
-
-
-void destroyFilter_returnsMinusOne( qunittest_t *test ) {
-    bool retVal = false;
-    
-    if ( destroyFilter( NULL ) == -1 )
-        retVal = true;
-    
-    qtest_assert_true( retVal, "Destroy filter returns -1", test );
-}
-
-
-void destroyFilter_returnsMinusTwo( qunittest_t *test ) {
-    firFilter *filter = createFilter( 1 );
-    double **data = getData( filter );
+    firFilter *filter2 = createFilter( 1 );
+    double **data = getData( filter2 );
     double *copy = *data;
     
     *data = NULL;
     
-    bool retVal = false;
-    
-    if ( destroyFilter( filter ) == -2 )
-        retVal = true;
+    qtest_assert_true( destroyFilter( filter2 ) == -2, "Destroy filter returns -2", test );
     
     free( copy ); // Tidy up memory leak
-    free( filter ); // Tidy up memory leak
-    
-    qtest_assert_true( retVal, "Destroy filter returns -2", test );
+    free( filter2 ); // Tidy up memory leak
 }
+
 
 void filterDataCorrectSize( qunittest_t *test ) {
     firFilter *filter = createFilter( 1 );
@@ -75,16 +55,45 @@ void filterDataCorrectSize( qunittest_t *test ) {
     qtest_assert_true( *( *data + 6 ) != 0, "OOB data is not zero", test ); // Should succeed as next data is order
     
     destroyFilter( filter );
+    
+    firFilter *filter2 = createFilter( 130 );
+    double **data2 = getData( filter2 );
+    int *order2 = getOrder( filter2 );
+    
+    qtest_assert_true( **data2 == 0 && *( *data2 + ( 130 * 6 - 1 ) ) == 0, "Large data initialised to zero", test );
+    qtest_assert_true( *order2 == 130, "Large order initialised correctly", test );
+    qtest_assert_true( *( *data2 + ( 6 * 132 ) ) != 0, "OOB large data is not zero", test ); // Should succeed as next data is order
+    
+    destroyFilter( filter2 );
+}
+
+
+void getCoefficients_getsCoefficients( qunittest_t *test ) {
+    firFilter *filter = createFilter( 1 );
+    double **data = getData( filter );
+    
+    double coeffs[ 6 ] = { 1, 3, 4, 6, 2, 19 };
+    
+    for ( int i = 0; i < 6; ++i ) {
+        *( *data + i ) = coeffs[ i ];
+    }
+    
+    for ( int i = 0; i < 6; ++i ) {
+        char str[ 100 ];
+        sprintf( str, "Retrieved coefficient %d", i );
+        qtest_assert_true( getCoefficients( filter )[ i ] == coeffs[ i ], str, test );
+    }
 }
 
 
 void addFilterTests( qtestsuite_t *testsuite ) {
     qunittest_t *createFilterTest = add_qunittest( "Create/destroy filter", testsuite );
     createFilter_returnsPointerToFilter( createFilterTest );
-    destroyFilter_returnsZero( createFilterTest );
-    destroyFilter_returnsMinusOne( createFilterTest );
-    destroyFilter_returnsMinusTwo( createFilterTest );
+    destroyFilter_returnsCorrectArg( createFilterTest );
     filterDataCorrectSize( createFilterTest );
+    
+    qunittest_t *dataRetrivalTest = add_qunittest( "Set/get filter data", testsuite );
+    getCoefficients_getsCoefficients( dataRetrivalTest );
     
 }
 
