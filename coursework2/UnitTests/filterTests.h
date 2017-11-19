@@ -84,6 +84,8 @@ void getCoefficients_getsCoefficients( qunittest_t *test ) {
         sprintf( str, "Retrieved coefficient %d: %f", i, getCoefficients( filter )[ i ] );
         qtest_assert_true( getCoefficients( filter )[ i ] == coeffs[ i ], str, test );
     }
+    
+    destroyFilter( filter );
 }
 
 
@@ -104,13 +106,17 @@ void getCoefficients_hasZeros( qunittest_t *test ) {
         sprintf( str, "Retrieved coeff %d:\t%f", i, getCoefficients( filter )[ i ] );
         qtest_assert_true( getCoefficients( filter )[ i ] == result[ i ], str, test );
     }
+    
+    destroyFilter( filter );
 }
 
 void setCoefficients_calculatesCorrectly( qunittest_t *test ) {
     const int order = 20;
     firFilter *filter = createFilter( order );
     
-    setCoefficients( filter, 2000, 460 );
+    int x = setCoefficients( filter, 2000, 460 );
+    
+    qtest_assert_true( x == 0, "Set coefficients returns 0", test );
     
     double result[ order + 1 ] = { 0.030273, 0.015059, -0.033595, -0.028985, 0.036316, 0.051504, -0.038337, -0.098652, 0.039580, 0.315800, 0.460000, 0.315800, 0.039580, -0.098652, -0.038337, 0.051504, 0.036316, -0.028985, -0.033595, 0.015059, 0.030273 };
     
@@ -119,6 +125,14 @@ void setCoefficients_calculatesCorrectly( qunittest_t *test ) {
         sprintf( str, "Coefficient %d expected:\t%f\tactual:\t%f", i, result[ i ], getCoefficients( filter )[ i ] );
         qtest_doubles_equal( result[ i ], getCoefficients( filter )[ i ], 0.00002, str, test );
     }
+    
+    destroyFilter( filter );
+}
+
+void setCoefficients_returnsMinusOne( qunittest_t *test ) {
+    int i = setCoefficients( NULL, 1, 2 );
+    
+    qtest_assert_true( i == -1, "Set coefficients returns -1", test );
 }
 
 
@@ -134,6 +148,7 @@ void addFilterTests( qtestsuite_t *testsuite ) {
     
     qunittest_t *coefficientTests = add_qunittest( "Set coefficients", testsuite );
     setCoefficients_calculatesCorrectly( coefficientTests );
+    setCoefficients_returnsMinusOne( coefficientTests );
 }
 
 
