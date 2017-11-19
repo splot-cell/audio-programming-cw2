@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "qtest/qtest/testsuite.h"
+#include "qtest/testsuite.h"
 #include "filterTests.h"
 
 int main() {

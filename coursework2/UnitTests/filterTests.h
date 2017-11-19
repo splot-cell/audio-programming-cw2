@@ -9,7 +9,7 @@
 #define filterTests_h
 
 #include <stdbool.h>
-#include "qtest/qtest/testsuite.h"
+#include "qtest/testsuite.h"
 #include "firfilter.h"
 #include <stdlib.h>
 
