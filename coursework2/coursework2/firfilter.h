@@ -35,10 +35,11 @@ int destroyFilter( firFilter *filter );
 
 
 /* setCoefficients()
- * Sets the coefficients of <filter> based on the chosen <samplerate>, <cutoff> frequency (Hz),
- * and quality factor <q>. Coefficients generate is low-pass response.
- * Returns 0 if successful. */
-int setCoefficients( firFilter *filter, int samplerate, double cutoff, double q );
+ * Sets the coefficients of <filter> based on the chosen <samplerate> and <cutoff> frequency (Hz).
+ * Coefficients generate windowed low-pass response.
+ * Returns 0 if successful.
+ * Returns -1 if passed NULL <filter> pointer. */
+int setCoefficients( firFilter *filter, int samplerate, double cutoff );
 
 
 /* getCoefficients()

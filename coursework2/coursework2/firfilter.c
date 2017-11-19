@@ -9,11 +9,12 @@
 #include <stdlib.h> // For malloc() and free().
 #include "enums.h" // For error codes.
 #include "constants.h" // For g_pi and g_tau
+#include <math.h> // For sin().
 
 
 typedef struct firfilter_struct {
     double *coeffs;
-    int order;
+    int numCoeffs;
 } firFilter;
 
 
@@ -28,7 +29,7 @@ firFilter* createFilter( int order ) {
         exit( BAD_MEMORY );
     }
     
-    filter->order = order + 1;
+    filter->numCoeffs = order + 1;
     
     return filter;
 }
@@ -48,7 +49,25 @@ int destroyFilter( firFilter *filter ) {
     return 0;
 }
 
-int setCoefficients( firFilter *filter, int samplerate, double cutoff, double q );
+int setCoefficients( firFilter *filter, int samplerate, double cutoff ) {
+    if ( filter == NULL ) {
+        return -1;
+    }
+    
+    double ft = cutoff / samplerate;
+    int M = filter->numCoeffs - 1;
+    
+    for ( int i = 0; i < filter->numCoeffs; ++i ) {
+        if ( i == M / 2 ) {
+            filter->coeffs[ i ] = 2 * ft;
+        }
+        else {
+            filter->coeffs[ i ] = sin( g_tau * ft * ( i - ( M / 2 ) ) ) / ( g_pi * ( i - ( M / 2 ) ) );
+        }
+    }
+    
+    return 0;
+}
 
 double *getCoefficients( firFilter *filter ) {
     return filter->coeffs;
@@ -61,7 +80,7 @@ double **getData( firFilter *filter ) {
 }
 
 int *getOrder( firFilter *filter ) {
-    return &filter->order;
+    return &filter->numCoeffs;
 }
 
 #endif // FILTER_TESTS
