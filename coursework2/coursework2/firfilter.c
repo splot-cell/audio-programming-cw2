@@ -23,12 +23,12 @@ firFilter* createFilter( int order ) {
         exit( BAD_MEMORY );
     }
     
-    filter->coeffs = calloc ( order, sizeof( double ) );
+    filter->coeffs = calloc ( order + 1, sizeof( double ) );
     if ( filter->coeffs == NULL ) {
         exit( BAD_MEMORY );
     }
     
-    filter->order = order;
+    filter->order = order + 1;
     
     return filter;
 }
