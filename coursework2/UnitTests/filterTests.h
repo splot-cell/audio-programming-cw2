@@ -110,14 +110,14 @@ void setCoefficients_calculatesCorrectly( qunittest_t *test ) {
     const int order = 20;
     firFilter *filter = createFilter( order );
     
-    setCoefficients( filter, 2000, 460, 1 );
+    setCoefficients( filter, 2000, 460 );
     
     double result[ order + 1 ] = { 0.030273, 0.015059, -0.033595, -0.028985, 0.036316, 0.051504, -0.038337, -0.098652, 0.039580, 0.315800, 0.460000, 0.315800, 0.039580, -0.098652, -0.038337, 0.051504, 0.036316, -0.028985, -0.033595, 0.015059, 0.030273 };
     
     for ( int i = 0; i < order + 1; ++i ) {
         char str[ 100 ];
         sprintf( str, "Coefficient %d expected:\t%f\tactual:\t%f", i, result[ i ], getCoefficients( filter )[ i ] );
-        qtest_assert_true( getCoefficients( filter )[ i ] == result[ i ], str, test );
+        qtest_doubles_equal( result[ i ], getCoefficients( filter )[ i ], 0.00002, str, test );
     }
 }
 
@@ -128,10 +128,12 @@ void addFilterTests( qtestsuite_t *testsuite ) {
     destroyFilter_returnsCorrectArg( createFilterTest );
     filterDataCorrectSize( createFilterTest );
     
-    qunittest_t *dataRetrivalTest = add_qunittest( "Set/get filter data", testsuite );
+    qunittest_t *dataRetrivalTest = add_qunittest( "Get filter data", testsuite );
     getCoefficients_getsCoefficients( dataRetrivalTest );
     getCoefficients_hasZeros( dataRetrivalTest );
-    setCoefficients_calculatesCorrectly( dataRetrivalTest );
+    
+    qunittest_t *coefficientTests = add_qunittest( "Set coefficients", testsuite );
+    setCoefficients_calculatesCorrectly( coefficientTests );
 }
 
 
