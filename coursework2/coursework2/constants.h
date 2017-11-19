@@ -11,4 +11,4 @@
 const double g_pi = 3.14159265359;
 const double g_tau = 2 * g_pi;
 
-#endif /* constants_h */
+#endif // constants_h

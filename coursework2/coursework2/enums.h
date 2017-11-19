@@ -16,4 +16,4 @@ enum ERR {
     OUT_OF_BOUNDS_VALUE
 };
 
-#endif /* enums_h */
+#endif // enums_h

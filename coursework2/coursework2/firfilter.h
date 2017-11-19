@@ -8,9 +8,16 @@
 #ifndef firfilter_h
 #define firfilter_h
 
+#ifdef FILTER_TESTS
+
+#include "firfilterAdditionalTest.h"
+
+#else
+
 /* Struct for storing filter data */
 typedef struct firfilter_struct firFilter;
 
+#endif // FILTER_TESTS
 
 /* FUNCTION PROTOTYPES */
 
@@ -22,7 +29,7 @@ firFilter* createFilter( int order );
 /* destroyFilter()
  * Frees dynamically allocated memory of <filter>.
  * If filter is NULL returns -1.
- * If data in filter is NULL returns -2.
+ * If data in filter is NULL returns -2 (this should not occur!).
  * If successful returns 0. */
 int destroyFilter( firFilter *filter );
 
@@ -39,4 +46,4 @@ int setCoefficients( firFilter *filter, int samplerate, double cutoff, double q 
  * coefficients specified by <order> parameter of createFilter(). */
 double *getCoefficients( firFilter *filter );
 
-#endif /* firfilter_h */
+#endif // firfilter_h

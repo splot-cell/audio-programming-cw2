@@ -51,3 +51,15 @@ int destroyFilter( firFilter *filter ) {
 int setCoefficients( firFilter *filter, int samplerate, double cutoff, double q );
 
 double *getCoefficients( firFilter *filter );
+
+#ifdef FILTER_TESTS
+
+double **getData( firFilter *filter ) {
+    return &filter->coeffs;
+}
+
+int *getOrder( firFilter *filter ) {
+    return &filter->order;
+}
+
+#endif // FILTER_TESTS
