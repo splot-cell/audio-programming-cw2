@@ -1,13 +1,19 @@
-#include <stdio.h>
-#include "qtest/testsuite.h"
-#include "filterTests.h"
+//
+//  main.c
+//  Unit Tests - coursework2
+//
+//  Created by Olly Seber on 18/11/2017.
+//
+
+#include "test_header.h"
 
 int main() {
     qtestsuite_t * testsuite = create_qtestsuite( "Test Suite" );
     
     addFilterTests( testsuite );
+    addUITests( testsuite );
     
     fprint_qtestsuite( stdout, testsuite );
-    getc( stdin );
+    
     return 0;
 }

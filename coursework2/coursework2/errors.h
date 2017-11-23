@@ -1,12 +1,14 @@
 //
-//  enums.h
+//  errors.h
 //  coursework2
 //
 //  Created by Olly Seber on 18/11/2017.
 //
 
-#ifndef enums_h
-#define enums_h
+#ifndef errors_h
+#define errors_h
+
+#include "firfilter.h"
 
 enum ERR {
     NO_ERR,
@@ -16,4 +18,4 @@ enum ERR {
     OUT_OF_BOUNDS_VALUE
 };
 
-#endif // enums_h
+#endif // errors_h

@@ -6,11 +6,8 @@
 //
 
 #include "firfilter.h"
-#include <stdlib.h> // For malloc() and free().
-#include "enums.h" // For error codes.
-#include "constants.h" // For g_pi and g_tau
-#include <math.h> // For sin().
 
+/* TYPE DEFINITIONS */
 
 typedef struct firfilter_struct {
     double *coeffs;
@@ -21,11 +18,14 @@ typedef struct firfilter_struct {
 firFilter* createFilter( int order ) {
     firFilter *filter = malloc( sizeof( firFilter ) );
     if ( filter == NULL ) {
+        printf( "Could not allocate filter memory!\n" );
         exit( BAD_MEMORY );
     }
     
     filter->coeffs = calloc ( order + 1, sizeof( double ) );
     if ( filter->coeffs == NULL ) {
+        printf( "Could not allocate coefficient memory!\n" );
+        free( filter ); // Avoid memory leak.
         exit( BAD_MEMORY );
     }
     

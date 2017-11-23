@@ -8,16 +8,32 @@
 #ifndef firfilter_h
 #define firfilter_h
 
+#include <stdlib.h> // For malloc() and free().
+#include <stdio.h> // For printf().
+#include <math.h> // For sin().
+
+#include "errors.h" // For error codes.
+#include "globals.h" // For g_pi and g_tau
+
 #ifdef FILTER_TESTS
 
 #include "firfilterAdditionalTest.h"
 
 #else
 
-/* Struct for storing filter data */
+/* DATA TYPES */
+
 typedef struct firfilter_struct firFilter;
 
 #endif // FILTER_TESTS
+
+typedef enum FIR_WINDOWING_ENUM {
+    WINDOW_RECTANGULAR,
+    WINDOW_BARTLETT,
+    WINDOW_HANNING,
+    WINDOW_HAMMING,
+    WINDOW_BLACKMAN
+} firWindow;
 
 /* FUNCTION PROTOTYPES */
 
@@ -40,6 +56,9 @@ int destroyFilter( firFilter *filter );
  * Returns 0 if successful.
  * Returns -1 if passed NULL <filter> pointer. */
 int setCoefficients( firFilter *filter, int samplerate, double cutoff );
+
+
+int setWindowing( firFilter *filter, );
 
 
 /* getCoefficients()

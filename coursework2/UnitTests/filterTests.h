@@ -8,10 +8,11 @@
 #ifndef filterTests_h
 #define filterTests_h
 
+#include <stdlib.h>
 #include <stdbool.h>
+
 #include "qtest/testsuite.h"
 #include "firfilter.h"
-#include <stdlib.h>
 
 void createFilter_returnsPointerToFilter( qunittest_t *test ) {
     firFilter *filter = createFilter( 1 );
