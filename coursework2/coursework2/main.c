@@ -12,8 +12,8 @@ int main( int argc, const char * argv[] ) {
     
     /* Check correct number of arguments are supplied */
     if ( commandLineArgumentHandler( argc, argv ) != 0 ) {
-        printf( "Run with zero additional command line arguments to print help.\n" );
-        return BAD_COMMAND_LINE;
+        fatalError( BAD_COMMAND_LINE,
+                   "Run with zero additional command line arguments to print help." );
     }
     
     /* Create pointers for input and output files, and the FIR filter */

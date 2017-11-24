@@ -12,6 +12,7 @@
 
 #include "qtest/testsuite.h" // Test suite
 
+
 /* TEST HEADERS */
 #include "filterTests.h"
 #include "uiTests.h"

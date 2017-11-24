@@ -14,6 +14,7 @@
 #include "firfilter.h"
 #include "filehandler.h"
 
+
 /* DATA TYPES */
 
 typedef struct userInputStrings_struct userInputStrings;

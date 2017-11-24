@@ -14,6 +14,7 @@
 #include "qtest/testsuite.h"
 #include "firfilter.h"
 
+
 void createFilter_returnsPointerToFilter( qunittest_t *test ) {
     firFilter *filter = createFilter( 1 );
     bool retVal = true;
@@ -27,23 +28,24 @@ void createFilter_returnsPointerToFilter( qunittest_t *test ) {
 }
 
 
-void destroyFilter_returnsCorrectArg( qunittest_t *test ) {
-    firFilter *filter = createFilter( 1 );
-    qtest_assert_true( destroyFilter( filter ) == 0, "Destroy filter returns 0", test );
-    
-    qtest_assert_true( destroyFilter( NULL ) == -1, "Destroy filter returns -1", test );
-    
-    firFilter *filter2 = createFilter( 1 );
-    double **data = getData( filter2 );
-    double *copy = *data;
-    
-    *data = NULL;
-    
-    qtest_assert_true( destroyFilter( filter2 ) == -2, "Destroy filter returns -2", test );
-    
-    free( copy ); // Tidy up memory leak
-    free( filter2 ); // Tidy up memory leak
-}
+/* Should be implemented in integration tests */
+//void destroyFilter_returnsCorrectArg( qunittest_t *test ) {
+//    firFilter *filter = createFilter( 1 );
+//    qtest_assert_true( destroyFilter( filter ) == 0, "Destroy filter returns 0", test );
+//    
+//    qtest_assert_true( destroyFilter( NULL ) == FILT_ARG_NULL, "Destroy filter returns ARG_ERR", test );
+//    
+//    firFilter *filter2 = createFilter( 1 );
+//    double **data = getData( filter2 );
+//    double *copy = *data;
+//    
+//    *data = NULL;
+//    
+//    qtest_assert_true( destroyFilter( filter2 ) == FILT_MEM_ERR, "Destroy filter returns MEM_ERR", test );
+//    
+//    free( copy ); // Tidy up memory leak
+//    free( filter2 ); // Tidy up memory leak
+//}
 
 
 void filterDataCorrectSize( qunittest_t *test ) {
@@ -111,13 +113,14 @@ void getCoefficients_hasZeros( qunittest_t *test ) {
     destroyFilter( filter );
 }
 
+
 void setCoefficients_calculatesCorrectly( qunittest_t *test ) {
     const int order = 20;
     firFilter *filter = createFilter( order );
     
-    int x = setCoefficients( filter, 2000, 460 );
+    int x = setCoefficients( filter, 2000, 460, WINDOW_RECTANGULAR );
     
-    qtest_assert_true( x == 0, "Set coefficients returns 0", test );
+    qtest_assert_true( x == FILT_NO_ERR, "Set coefficients returns 0", test );
     
     double result[ order + 1 ] = { 0.030273, 0.015059, -0.033595, -0.028985, 0.036316, 0.051504, -0.038337, -0.098652, 0.039580, 0.315800, 0.460000, 0.315800, 0.039580, -0.098652, -0.038337, 0.051504, 0.036316, -0.028985, -0.033595, 0.015059, 0.030273 };
     
@@ -130,17 +133,105 @@ void setCoefficients_calculatesCorrectly( qunittest_t *test ) {
     destroyFilter( filter );
 }
 
+
 void setCoefficients_returnsMinusOne( qunittest_t *test ) {
-    int i = setCoefficients( NULL, 1, 2 );
+    int i = setCoefficients( NULL, 1, 2, WINDOW_RECTANGULAR );
     
-    qtest_assert_true( i == -1, "Set coefficients returns -1", test );
+    qtest_assert_true( i == FILT_ARG_NULL, "Set coefficients returns -1", test );
+}
+
+
+void setAllCoefficientsToOne( firFilter *filter, int order ) {
+    double **data = getData( filter );
+    
+    for( int i = 0; i < order + 1; ++i ) {
+        (*data)[ i ] = 1;
+    }
+}
+
+
+void bartTests( qunittest_t *test ) {
+    const int order = 20;
+    firFilter *filter = createFilter( 20 );
+    
+    setAllCoefficientsToOne( filter, order );
+    
+    double result[] = { 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
+        1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0 };
+    
+    for ( int i = 0; i < order + 1; ++i ) {
+        char str[ 100 ];
+        sprintf( str, "Bart window %d expected:\t%f\tactual:\t%f", i, result[ i ], getCoefficients( filter )[ i ] );
+        qtest_doubles_equal( result[ i ], getCoefficients( filter )[ i ], 0.00002, str, test );
+    }
+    
+}
+
+
+void hannTests( qunittest_t *test ) {
+    const int order = 20;
+    firFilter *filter = createFilter( 20 );
+    
+    setAllCoefficientsToOne( filter, order );
+    
+    double result[] = { 0, 0.0244717418524232, 0.0954915028125263, 0.206107373853763,
+        0.345491502812526, 0.5, 0.654508497187474, 0.793892626146236,
+        0.904508497187474, 0.975528258147577, 1, 0.975528258147577,
+        0.904508497187474, 0.793892626146237, 0.654508497187474, 0.5,
+        0.345491502812526, 0.206107373853764, 0.0954915028125263, 0.0244717418524232, 0 };
+    
+    for ( int i = 0; i < order + 1; ++i ) {
+        char str[ 100 ];
+        sprintf( str, "Hann window %d expected:\t%f\tactual:\t%f", i, result[ i ], getCoefficients( filter )[ i ] );
+        qtest_doubles_equal( result[ i ], getCoefficients( filter )[ i ], 0.00002, str, test );
+    }
+    
+}
+
+
+void hammTests( qunittest_t *test ) {
+    const int order = 20;
+    firFilter *filter = createFilter( 20 );
+    
+    setAllCoefficientsToOne( filter, order );
+    
+    double result[] = { 0.08, 0.0802269822317635, 0.0809077049229951, 0.0820414962825832,
+        0.0836272373953402, 0.0856633633262366, 0.0881478646648032, 0.0910782895081762,
+        0.0944517458808297, 0.0982649045886062, 0.102514002504229, 0.0982649045886062,
+        0.0944517458808297, 0.0910782895081762, 0.0881478646648032, 0.0856633633262366,
+        0.0836272373953402, 0.0820414962825832, 0.0809077049229951, 0.0802269822317635, 0.08 };
+    
+    for ( int i = 0; i < order + 1; ++i ) {
+        char str[ 100 ];
+        sprintf( str, "Hamm window %d expected:\t%f\tactual:\t%f", i, result[ i ], getCoefficients( filter )[ i ] );
+        qtest_doubles_equal( result[ i ], getCoefficients( filter )[ i ], 0.00002, str, test );
+    }
+    
+}
+
+
+void blkTests( qunittest_t *test ) {
+    const int order = 20;
+    firFilter *filter = createFilter( 20 );
+    
+    setAllCoefficientsToOne( filter, order );
+    
+    double result[] = { 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
+        1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0 };
+    
+    for ( int i = 0; i < order + 1; ++i ) {
+        char str[ 100 ];
+        sprintf( str, "Blackman window %d expected:\t%f\tactual:\t%f", i, result[ i ], getCoefficients( filter )[ i ] );
+        qtest_doubles_equal( result[ i ], getCoefficients( filter )[ i ], 0.00002, str, test );
+    }
+    
 }
 
 
 void addFilterTests( qtestsuite_t *testsuite ) {
     qunittest_t *createFilterTest = add_qunittest( "Create/destroy filter", testsuite );
     createFilter_returnsPointerToFilter( createFilterTest );
-    destroyFilter_returnsCorrectArg( createFilterTest );
+    //destroyFilter_returnsCorrectArg( createFilterTest );
     filterDataCorrectSize( createFilterTest );
     
     qunittest_t *dataRetrivalTest = add_qunittest( "Get filter data", testsuite );
@@ -150,6 +241,12 @@ void addFilterTests( qtestsuite_t *testsuite ) {
     qunittest_t *coefficientTests = add_qunittest( "Set coefficients", testsuite );
     setCoefficients_calculatesCorrectly( coefficientTests );
     setCoefficients_returnsMinusOne( coefficientTests );
+    
+    qunittest_t *windowingTests = add_qunittest( "Window weighting", testsuite );
+    bartTests( windowingTests );
+    hannTests( windowingTests );
+    hammTests( windowingTests );
+    
 }
 
 

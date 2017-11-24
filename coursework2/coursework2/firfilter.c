@@ -7,6 +7,7 @@
 
 #include "firfilter.h"
 
+
 /* GLOBALS */
 
 const double g_pi = 3.14159265359;
@@ -22,6 +23,14 @@ typedef struct firfilter_struct {
 
 
 /* PRIVATE FUNCTION PROTOTYPES */
+
+void applyBartlettWindow( firFilter filter );
+
+void applyHanningWindow( firFilter filter );
+
+void applyHammingWindow( firFilter filter );
+
+void applyBlackmanWindow( firFilter filter );
 
 void fatalError( firErr code, char *info );
 
@@ -82,6 +91,19 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
     
     return FILT_NO_ERR;
 }
+
+
+void applyBartlettWindow( firFilter filter ) {
+    
+}
+
+
+void applyHanningWindow( firFilter filter );
+
+void applyHammingWindow( firFilter filter );
+
+void applyBlackmanWindow( firFilter filter );
+
 
 
 void fatalError( firErr code, char *info ) {

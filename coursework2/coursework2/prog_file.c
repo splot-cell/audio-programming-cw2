@@ -8,6 +8,15 @@
 
 #include "prog_header.h"
 
+
+/* FUNCTION DEFINITIONS */
+
+void fatalError( int code, char *info ) {
+    printf( "ERROR: %s\n", info );
+    exit( code );
+}
+
+
 void cleanupMemory( audioFile *inputFile, audioFile *outputFile, firFilter *filter ) {
     closeFile( inputFile );
     closeFile( outputFile );

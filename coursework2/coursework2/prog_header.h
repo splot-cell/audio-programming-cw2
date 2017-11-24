@@ -30,7 +30,12 @@ enum ERR {
 /* FUNCTION PROTOTYPES */
 
 /*      cleanupMemory()
- * Helper function for freeing dynamicly allocated memory at end of program */
+ * Helper function for freeing dynamicly allocated memory at end of program. */
 void cleanupMemory( audioFile *inputFile, audioFile *outputFile, firFilter *filter );
+
+
+/*      fatalError()
+ * Helper function for printing error code and exiting program. */
+void fatalError( int code, char *info );
 
 #endif // prog_header_h

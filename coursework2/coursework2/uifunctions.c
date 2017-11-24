@@ -7,6 +7,7 @@
 
 #include "uifunctions.h"
 
+
 /* FUNCTION DEFINITIONS */
 
 bool isOnlyPositiveInt( const char *string ) {
