@@ -7,6 +7,12 @@
 
 #include "firfilter.h"
 
+/* GLOBALS */
+
+const double g_pi = 3.14159265359;
+const double g_tau = 2 * g_pi;
+
+
 /* TYPE DEFINITIONS */
 
 typedef struct firfilter_struct {
@@ -15,18 +21,23 @@ typedef struct firfilter_struct {
 } firFilter;
 
 
+/* PRIVATE FUNCTION PROTOTYPES */
+
+void fatalError( firErr code, char *info );
+
+
+/* FUNCTION DEFINITIONS */
+
 firFilter* createFilter( int order ) {
     firFilter *filter = malloc( sizeof( firFilter ) );
     if ( filter == NULL ) {
-        printf( "Could not allocate filter memory!\n" );
-        exit( BAD_MEMORY );
+        fatalError( FILT_MEM_ERR, "Could not allocate filter memory." );
     }
     
     filter->coeffs = calloc ( order + 1, sizeof( double ) );
     if ( filter->coeffs == NULL ) {
-        printf( "Could not allocate coefficient memory!\n" );
-        free( filter ); // Avoid memory leak.
-        exit( BAD_MEMORY );
+        free( filter ); // Tidy up.
+        fatalError( FILT_MEM_ERR, "Could not allocate coefficient memory." );
     }
     
     filter->numCoeffs = order + 1;
@@ -35,23 +46,24 @@ firFilter* createFilter( int order ) {
 }
 
 
-int destroyFilter( firFilter *filter ) {
+firErr destroyFilter( firFilter *filter ) {
     if ( filter == NULL ) {
-        return -1;
+        return FILT_ARG_NULL;
     }
     if ( filter->coeffs == NULL ) {
-        return -2;
+        fatalError( FILT_MEM_ERR, "Filter coefficients NULL." );
     }
     
     free( filter->coeffs );
     free( filter );
     
-    return 0;
+    return FILT_NO_ERR;
 }
 
-int setCoefficients( firFilter *filter, int samplerate, double cutoff ) {
+
+firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWindow window ) {
     if ( filter == NULL ) {
-        return -1;
+        return FILT_ARG_NULL;
     }
     
     double ft = cutoff / samplerate;
@@ -66,12 +78,17 @@ int setCoefficients( firFilter *filter, int samplerate, double cutoff ) {
         }
     }
     
-    return 0;
+    // NEED TO ADD WINDOWING
+    
+    return FILT_NO_ERR;
 }
 
-double *getCoefficients( firFilter *filter ) {
-    return filter->coeffs;
+
+void fatalError( firErr code, char *info ) {
+    printf( "FIR FILTER ERROR: %s\n", info );
+    exit( code );
 }
+
 
 #ifdef FILTER_TESTS
 
@@ -81,6 +98,10 @@ double **getData( firFilter *filter ) {
 
 int *getOrder( firFilter *filter ) {
     return &filter->numCoeffs;
+}
+
+double *getCoefficients( firFilter *filter ) {
+    return filter->coeffs;
 }
 
 #endif // FILTER_TESTS

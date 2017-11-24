@@ -7,3 +7,9 @@
 //
 
 #include "prog_header.h"
+
+void cleanupMemory( audioFile *inputFile, audioFile *outputFile, firFilter *filter ) {
+    destroyWav( inputFile );
+    destroyWav( outputFile );
+    destroyFilter( filter );
+}

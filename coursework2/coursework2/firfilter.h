@@ -12,9 +12,6 @@
 #include <stdio.h> // For printf().
 #include <math.h> // For sin().
 
-#include "errors.h" // For error codes.
-#include "globals.h" // For g_pi and g_tau
-
 #ifdef FILTER_TESTS
 
 #include "firfilterAdditionalTest.h"
@@ -35,35 +32,35 @@ typedef enum FIR_WINDOWING_ENUM {
     WINDOW_BLACKMAN
 } firWindow;
 
+typedef enum FILTER_ERROR_ENUM {
+    FILT_NO_ERR,
+    FILT_MEM_ERR,
+    FILT_ARG_NULL
+} firErr;
+
+
 /* FUNCTION PROTOTYPES */
 
-/* createFilter()
- * Dynamically creates FIR filter struct with <order> coefficients. */
+/*      createFilter()
+ * Creates FIR filter struct to contain a filter of order <order>. */
 firFilter* createFilter( int order );
 
 
-/* destroyFilter()
- * Frees dynamically allocated memory of <filter>.
- * If filter is NULL returns -1.
- * If data in filter is NULL returns -2 (this should not occur!).
- * If successful returns 0. */
-int destroyFilter( firFilter *filter );
+/*      destroyFilter()
+ * Frees memory allocated to <filter>.
+ * Returns FILT_NO_ERR if successful.
+ * Returns FILT_ARG_NULL if <filter> is NULL. */
+firErr destroyFilter( firFilter *filter );
 
 
-/* setCoefficients()
- * Sets the coefficients of <filter> based on the chosen <samplerate> and <cutoff> frequency (Hz).
- * Coefficients generate windowed low-pass response.
- * Returns 0 if successful.
- * Returns -1 if passed NULL <filter> pointer. */
-int setCoefficients( firFilter *filter, int samplerate, double cutoff );
+/*      setCoefficients()
+ * Sets the coefficients of <filter> based on the chosen <samplerate> (Hz) and <cutoff> frequency (Hz).
+ * Coefficients generate windowed low-pass response, using <window> specified.
+ * Returns FILT_NO_ERR if successful.
+ * Returns FILT_ARG_NULL if <filter> is NULL. */
+firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWindow window );
 
 
-int setWindowing( firFilter *filter, );
-
-
-/* getCoefficients()
- * Returns point to an array of doubles. Each element in array is a coefficient. Number of
- * coefficients specified by <order> parameter of createFilter(). */
-double *getCoefficients( firFilter *filter );
+//firErr setWindowing( firFilter *filter, );
 
 #endif // firfilter_h

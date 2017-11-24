@@ -16,4 +16,11 @@
 #include "firfilter.h"
 #include "filehandler.h"
 
+
+/* FUNCTION PROTOTYPES */
+
+/*      cleanupMemory()
+ * Helper function for freeing dynamicly allocated memory at end of program */
+void cleanupMemory( wav *inputFile, wav *outputFile, firFilter *filter );
+
 #endif // prog_header_h

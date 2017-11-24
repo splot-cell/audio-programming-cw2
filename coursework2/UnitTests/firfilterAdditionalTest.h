@@ -14,4 +14,6 @@ double **getData( firFilter *filter );
 
 int *getOrder( firFilter *filter );
 
+double *getCoefficients( firFilter *filter );
+
 #endif // firfilterAdditionalTest_h

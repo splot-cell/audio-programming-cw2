@@ -7,10 +7,6 @@
 
 #include "prog_header.h"
 
-/* cleanupMemory()
- * Helper function for freeing dynamicly allocated memory at end of program */
-void cleanupMemory( wav *inputFile, wav *outputFile, firFilter *filter );
-
 
 int main( int argc, const char * argv[] ) {
     
@@ -38,11 +34,4 @@ int main( int argc, const char * argv[] ) {
     cleanupMemory( inputFile, outputFile, filter );
     
     return NO_ERR;
-}
-
-
-void cleanupMemory( audioFile *inputFile, audioFile *outputFile, firFilter *filter ) {
-    destroyWav( inputFile );
-    destroyWav( outputFile );
-    destroyFilter( filter );
 }

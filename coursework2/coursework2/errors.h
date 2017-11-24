@@ -8,8 +8,6 @@
 #ifndef errors_h
 #define errors_h
 
-#include "firfilter.h"
-
 enum ERR {
     NO_ERR,
     BAD_MEMORY,
