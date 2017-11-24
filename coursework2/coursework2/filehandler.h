@@ -8,6 +8,8 @@
 #ifndef filehandler_h
 #define filehandler_h
 
+/* DATA TYPES */
+
 typedef struct audioFile_struct audioFile;
 
 #endif // filehandler_h

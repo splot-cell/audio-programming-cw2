@@ -14,7 +14,12 @@
 #include "firfilter.h"
 #include "filehandler.h"
 
+/* DATA TYPES */
+
 typedef struct userInputStrings_struct userInputStrings;
+
+
+/* FUNCTION PROTOTYPES */
 
 /* isOnlyPositiveInt()
  * Input of a <string>. Each character is evaluated in turn.
@@ -28,6 +33,9 @@ bool isOnlyPositiveInt( const char *string );
  *  - Four arguments = return 0.
  *  - Else = invalid, return -1. */
 int commandLineArgumentHandler( int argc, char *argv[] );
+
+
+int interpretOptionalArgs();
 
 
 int interpretUserInput( int argc, char *argv[], audioFile *inputFile, audioFile *outputFile, firFilter *filter );
