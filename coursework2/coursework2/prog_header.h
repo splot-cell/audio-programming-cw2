@@ -12,15 +12,25 @@
 #include <stdio.h>
 
 #include "uifunctions.h"
-#include "errors.h"
 #include "firfilter.h"
 #include "filehandler.h"
+
+
+/* DATA TYPES */
+
+enum ERR {
+    NO_ERR,
+    BAD_MEMORY,
+    BAD_COMMAND_LINE,
+    BAD_RUNTIME_ARG,
+    OUT_OF_BOUNDS_VALUE
+};
 
 
 /* FUNCTION PROTOTYPES */
 
 /*      cleanupMemory()
  * Helper function for freeing dynamicly allocated memory at end of program */
-void cleanupMemory( wav *inputFile, wav *outputFile, firFilter *filter );
+void cleanupMemory( audioFile *inputFile, audioFile *outputFile, firFilter *filter );
 
 #endif // prog_header_h
