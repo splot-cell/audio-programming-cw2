@@ -216,8 +216,12 @@ void blkTests( qunittest_t *test ) {
     
     setAllCoefficientsToOne( filter, order );
     
-    double result[] = { 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
-        1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0 };
+    double result[] = { -0.0000000000000000, 0.00919310140241901,
+        0.0402128623625221, 0.101386014303768, 0.20077014326253, 0.34,
+        0.509787137637478, 0.689171266596241, 0.849229856737469, 0.960249617697573,
+        1, 0.960249617697573, 0.849229856737469, 0.689171266596241,
+        0.509787137637478, 0.34, 0.200770143262531, 0.101386014303768,
+        0.0402128623625221, 0.009193101402419, -0.0000000000000000 };
     
     for ( int i = 0; i < order + 1; ++i ) {
         char str[ 100 ];
@@ -246,6 +250,7 @@ void addFilterTests( qtestsuite_t *testsuite ) {
     bartTests( windowingTests );
     hannTests( windowingTests );
     hammTests( windowingTests );
+    blkTests( windowingTests );
     
 }
 
