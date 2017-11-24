@@ -76,7 +76,7 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
     }
     
     double ft = cutoff / samplerate;
-    int M = filter->numCoeffs - 1;
+    float M = filter->numCoeffs - 1;
     
     for ( int i = 0; i < filter->numCoeffs; ++i ) {
         if ( i == M / 2 ) {
@@ -111,16 +111,35 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
 
 
 void applyBartlettWindow( firFilter *filter ) {
-    
+    float M = filter->numCoeffs - 1;
+    for ( int i = 0; i < filter->numCoeffs; ++i ) {
+        filter->coeffs[ i ] *= 1 - ( 2 * fabs( i - ( M / 2 ) ) / M );
+    }
 }
 
 
-void applyHanningWindow( firFilter *filter );
+void applyHanningWindow( firFilter *filter ) {
+    float M = filter->numCoeffs - 1;
+    for ( int i = 0; i < filter->numCoeffs; ++i ) {
+        filter->coeffs[ i ] *= 0.5 - ( 0.5 * cos( 2 * g_pi * i / M ) );
+    }
+}
 
-void applyHammingWindow( firFilter *filter );
 
-void applyBlackmanWindow( firFilter *filter );
+void applyHammingWindow( firFilter *filter ) {
+    float M = filter->numCoeffs - 1;
+    for ( int i = 0; i < filter->numCoeffs; ++i ) {
+        filter->coeffs[ i ] *= 0.54 - ( 0.46 * cos( 2.0 * g_pi * i / M ) );
+    }
+}
 
+
+void applyBlackmanWindow( firFilter *filter ) {
+    float M = filter->numCoeffs - 1;
+    for ( int i = 0; i < filter->numCoeffs; ++i ) {
+        filter->coeffs[ i ] *= 0.42 - ( 0.5 * cos( 2.0 * g_pi * i / M ) ) + ( 0.08 * cos( 4.0 * g_pi * i / M ) );
+    }
+}
 
 
 void fatalError( firErr code, char *info ) {
