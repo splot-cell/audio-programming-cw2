@@ -5,8 +5,8 @@
 //  Created by Olly Seber on 19/11/2017.
 //
 
-#ifndef uifunctions_h
-#define uifunctions_h
+#ifndef iofunctions_h
+#define iofunctions_h
 
 #include <stdbool.h> // For booleans.
 #include <string.h> // For strlen()
@@ -41,4 +41,4 @@ int interpretOptionalArgs();
 
 int interpretUserInput( int argc, char *argv[], audioFile *inputFile, audioFile *outputFile, firFilter *filter );
 
-#endif // uifunctions_h
+#endif // iofunctions_h

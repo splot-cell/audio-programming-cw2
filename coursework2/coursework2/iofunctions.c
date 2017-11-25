@@ -1,11 +1,11 @@
 //
-//  uifunctions.c
+//  iofunctions.c
 //  coursework2
 //
 //  Created by Olly Seber on 19/11/2017.
 //
 
-#include "uifunctions.h"
+#include "iofunctions.h"
 
 
 /* FUNCTION DEFINITIONS */

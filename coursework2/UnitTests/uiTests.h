@@ -8,7 +8,7 @@
 #ifndef uiTests_h
 #define uiTests_h
 
-#include "uifunctions.h"
+#include "iofunctions.h"
 #include "qtest/testsuite.h"
 
 

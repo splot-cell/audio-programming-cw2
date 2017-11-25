@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 
-#include "uifunctions.h"
+#include "iofunctions.h"
 #include "firfilter.h"
 #include "filehandler.h"
 
