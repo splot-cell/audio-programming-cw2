@@ -35,15 +35,17 @@ typedef enum FIR_WINDOWING_ENUM {
 typedef enum FILTER_ERROR_ENUM {
     FILT_NO_ERR,
     FILT_MEM_ERR,
-    FILT_ARG_NULL
+    FILT_ARG_NULL,
+    FILT_BAD_ARG
 } firErr;
 
 
 /* FUNCTION PROTOTYPES */
 
 /*      createFilter()
- * Creates FIR filter struct to contain a filter of order <order>. */
-firFilter* createFilter( int order );
+ * Creates FIR filter struct to contain a filter of order <order>.
+ * <circularBuffer> = pointer to an array of doubles of size order + 1. */
+firFilter* createFilter( int order, double *circularBuffer );
 
 
 /*      destroyFilter()
@@ -61,6 +63,8 @@ firErr destroyFilter( firFilter *filter );
 firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWindow window );
 
 
-//firErr setWindowing( firFilter *filter, );
+/*      processBuffer()
+ * */
+firErr processBuffer( firFilter *filter, double *buffer, int numSamples );
 
 #endif // firfilter_h

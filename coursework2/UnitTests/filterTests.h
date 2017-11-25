@@ -10,13 +10,25 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include "qtest/testsuite.h"
 #include "firfilter.h"
 
 
+/* GLOBALS */
+double g_buf[ 130 ]; // Single buffer used to create each filter under test. Saves memory.
+
+
+void resetg_buf( void ) {
+    for ( int i = 0; i < 130; ++i ){
+        g_buf[ i ] = rand() / RAND_MAX;
+    }
+}
+
+
 void createFilter_returnsPointerToFilter( qunittest_t *test ) {
-    firFilter *filter = createFilter( 1 );
+    firFilter *filter = createFilter( 1, g_buf );
     bool retVal = true;
     if ( filter == NULL ) {
         retVal = false;
@@ -50,22 +62,41 @@ void createFilter_returnsPointerToFilter( qunittest_t *test ) {
 
 void filterDataCorrectSize( qunittest_t *test ) {
     const int size = 1;
-    firFilter *filter = createFilter( size - 1 );
+    firFilter *filter = createFilter( size - 1, g_buf );
     double **data = getData( filter );
     int *order = getOrder( filter );
     
-    qtest_assert_true( ( **data == 0 ), "Data initialised to zero", test );
+    qtest_assert_true( ( **data == 0 ), "Coeffs initialised to zero", test );
     qtest_assert_true( *order == size, "Order initialised correctly", test );
+    
+    bool retVal = true;
+    for ( int i = 0; i < size && retVal; ++i ){
+        if ( g_buf[ i ] != 0 ){
+            retVal = false;
+        }
+    }
+    qtest_assert_true( retVal, "Short delayLine initialised to zero", test );
+    resetg_buf();
+    
     
     destroyFilter( filter );
     
     const int size2 = 130;
-    firFilter *filter2 = createFilter( size2 - 1 );
+    firFilter *filter2 = createFilter( size2 - 1, g_buf );
     double **data2 = getData( filter2 );
     int *order2 = getOrder( filter2 );
     
-    qtest_assert_true( ( **data2 == 0 && *( *data2 + ( size2 - 1 ) ) == 0 ), "Large data initialised to zero", test );
+    qtest_assert_true( ( **data2 == 0 && *( *data2 + ( size2 - 1 ) ) == 0 ), "Large coeffs initialised to zero", test );
     qtest_assert_true( ( *order2 == size2 ), "Large order initialised correctly", test );
+    
+    retVal = true;
+    for ( int i = 0; i < size2 && retVal; ++i ){
+        if ( g_buf[ i ] != 0 ){
+            retVal = false;
+        }
+    }
+    qtest_assert_true( retVal, "Long delayLine initialised to zero", test );
+    resetg_buf();
     
     destroyFilter( filter2 );
 }
@@ -73,7 +104,7 @@ void filterDataCorrectSize( qunittest_t *test ) {
 
 void getCoefficients_getsCoefficients( qunittest_t *test ) {
     const int size = 6;
-    firFilter *filter = createFilter( size - 1 );
+    firFilter *filter = createFilter( size - 1, g_buf );
     double **data = getData( filter );
     
     double coeffs[ size ] = { 1, 3, 4, 6, 2, 19 };
@@ -94,7 +125,7 @@ void getCoefficients_getsCoefficients( qunittest_t *test ) {
 
 void getCoefficients_hasZeros( qunittest_t *test ) {
     const int size = 19;
-    firFilter *filter = createFilter( size - 1 );
+    firFilter *filter = createFilter( size - 1, g_buf );
     double **data = getData( filter );
     
     double coeffs[ 6 ] = { 5, 4, 5, 2, 5, 5.6 };
@@ -116,7 +147,7 @@ void getCoefficients_hasZeros( qunittest_t *test ) {
 
 void setCoefficients_calculatesCorrectly( qunittest_t *test ) {
     const int order = 20;
-    firFilter *filter = createFilter( order );
+    firFilter *filter = createFilter( order, g_buf );
     
     int x = setCoefficients( filter, 2000, 460, WINDOW_RECTANGULAR );
     
@@ -152,7 +183,7 @@ void setAllCoefficientsToOne( firFilter *filter, int order ) {
 
 void bartTests( qunittest_t *test ) {
     const int order = 20;
-    firFilter *filter = createFilter( 20 );
+    firFilter *filter = createFilter( 20, g_buf );
     
     setAllCoefficientsToOne( filter, order );
     
@@ -172,7 +203,7 @@ void bartTests( qunittest_t *test ) {
 
 void hannTests( qunittest_t *test ) {
     const int order = 20;
-    firFilter *filter = createFilter( 20 );
+    firFilter *filter = createFilter( 20, g_buf );
     
     setAllCoefficientsToOne( filter, order );
     
@@ -195,7 +226,7 @@ void hannTests( qunittest_t *test ) {
 
 void hammTests( qunittest_t *test ) {
     const int order = 20;
-    firFilter *filter = createFilter( 20 );
+    firFilter *filter = createFilter( 20, g_buf );
     
     setAllCoefficientsToOne( filter, order );
     
@@ -218,7 +249,7 @@ void hammTests( qunittest_t *test ) {
 
 void blkTests( qunittest_t *test ) {
     const int order = 20;
-    firFilter *filter = createFilter( 20 );
+    firFilter *filter = createFilter( 20, g_buf );
     
     setAllCoefficientsToOne( filter, order );
     
@@ -250,6 +281,9 @@ void blkTests( qunittest_t *test ) {
 
 
 void addFilterTests( qtestsuite_t *testsuite ) {
+    srand( ( unsigned int ) time( NULL ) );
+    resetg_buf();
+    
     qunittest_t *createFilterTest = add_qunittest( "Create/destroy filter", testsuite );
     createFilter_returnsPointerToFilter( createFilterTest );
     //destroyFilter_returnsCorrectArg( createFilterTest );
@@ -268,6 +302,8 @@ void addFilterTests( qtestsuite_t *testsuite ) {
     hannTests( windowingTests );
     hammTests( windowingTests );
     blkTests( windowingTests );
+    
+    
     
 }
 

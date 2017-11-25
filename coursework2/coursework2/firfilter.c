@@ -19,10 +19,14 @@ const double g_tau = 2 * g_pi;
 typedef struct firfilter_struct {
     double *coeffs;
     int numCoeffs;
+    double *delayLine;
+    int delayLineIndex;
 } firFilter;
 
 
 /* PRIVATE FUNCTION PROTOTYPES */
+
+firErr initDelayLine( firFilter *filter );
 
 void applyBartlettWindow( firFilter *filter );
 
@@ -37,7 +41,7 @@ void fatalError( firErr code, char *info );
 
 /* FUNCTION DEFINITIONS */
 
-firFilter* createFilter( int order ) {
+firFilter* createFilter( int order, double *circularBuffer ) {
     firFilter *filter = malloc( sizeof( firFilter ) );
     if ( filter == NULL ) {
         fatalError( FILT_MEM_ERR, "Could not allocate filter memory." );
@@ -50,6 +54,12 @@ firFilter* createFilter( int order ) {
     }
     
     filter->numCoeffs = order + 1;
+    filter->delayLine = circularBuffer;
+    filter->delayLineIndex = 0;
+    
+    if ( initDelayLine( filter ) != FILT_NO_ERR ) {
+        fatalError( FILT_MEM_ERR, "Error initialising filter: NULL filter address." );
+    }
     
     return filter;
 }
@@ -106,6 +116,38 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
             break;
     }
     
+    return FILT_NO_ERR;
+}
+
+
+firErr processBuffer( firFilter *filter, double *buffer, int numSamples ) {
+    if ( filter == NULL || buffer == NULL ) {
+        return FILT_ARG_NULL;
+    }
+    if ( numSamples < 0 ) {
+        return FILT_BAD_ARG;
+    }
+    
+    for ( int i; i < numSamples; ++i ) {
+        filter->delayLine[ filter->delayLineIndex ] = buffer[ i ];
+        for ( int j; j < filter->numCoeffs; ++j ){
+            buffer[ i ] = filter->coeffs[ j ] *
+                filter->delayLine[ ( filter->delayLineIndex + j ) % filter->numCoeffs ];
+            filter->delayLineIndex = ( filter->delayLineIndex + 1 ) % filter->numCoeffs;
+        }
+    }
+    return FILT_NO_ERR;
+}
+
+
+firErr initDelayLine( firFilter *filter ) {
+    if ( filter == NULL ) {
+        return FILT_ARG_NULL;
+    }
+    
+    for ( int i = 0; i < filter->numCoeffs; ++i ){
+        filter->delayLine[ i ] = 0;
+    }
     return FILT_NO_ERR;
 }
 
