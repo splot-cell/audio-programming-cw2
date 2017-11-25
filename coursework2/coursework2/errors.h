@@ -18,7 +18,9 @@ enum ERR {
     BAD_MEMORY,
     BAD_COMMAND_LINE,
     BAD_RUNTIME_ARG,
-    OUT_OF_BOUNDS_VALUE
+    OUT_OF_BOUNDS_VALUE,
+    BAD_FILE_WRITE,
+    NULL_FUNC_ARG = -1 // Required for functions that would otherwise return positive int
 };
 
 
