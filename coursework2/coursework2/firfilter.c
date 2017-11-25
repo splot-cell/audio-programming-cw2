@@ -185,7 +185,7 @@ void applyBlackmanWindow( firFilter *filter ) {
 
 
 void fatalError( firErr code, char *info ) {
-    printf( "FIR FILTER ERROR: %s\n", info );
+    fprintf( stderr, "FIR FILTER ERROR: %s\n", info );
     exit( code );
 }
 

@@ -12,6 +12,8 @@
 #include <string.h> // For strlen()
 
 #include "firfilter.h"
+#include "sndfile.h"
+#include "errors.h"
 
 
 /* DATA TYPES */

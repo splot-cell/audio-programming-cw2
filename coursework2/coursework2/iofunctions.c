@@ -8,6 +8,14 @@
 #include "iofunctions.h"
 
 
+/* TYPE DEFINITIONS */
+
+typedef struct audioFile_struct {
+    SNDFILE *audioFile;
+    SF_INFO infoFile;
+} audioFile;
+
+
 /* FUNCTION DEFINITIONS */
 
 bool isOnlyPositiveInt( const char *string ) {
@@ -24,4 +32,13 @@ bool isOnlyPositiveInt( const char *string ) {
         }
     }
     return retValue;
+}
+
+
+audioFile openWavRead( char *filename ) {
+    audioFile *file = calloc( 1, sizeof( audioFile ) );
+    if ( file == NULL ) {
+        fatalError( BAD_MEMORY, "Could not allocate memory for audio file." );
+    }
+    file->audioFile = sf_open(<#const char *path#>, <#int mode#>, <#SF_INFO *sfinfo#>)
 }
