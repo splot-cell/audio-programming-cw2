@@ -12,12 +12,13 @@
 #include <string.h> // For strlen()
 
 #include "firfilter.h"
-#include "filehandler.h"
 
 
 /* DATA TYPES */
 
 typedef struct userInputStrings_struct userInputStrings;
+
+typedef struct audioFile_struct audioFile;
 
 
 /* FUNCTION PROTOTYPES */
