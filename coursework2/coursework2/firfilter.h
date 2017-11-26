@@ -32,6 +32,13 @@ typedef enum FIR_WINDOWING_ENUM {
     WINDOW_BLACKMAN
 } firWindow;
 
+
+typedef enum FILTER_TYPE_ENUM {
+    TYPE_LOWPASS,
+    TYPE_HIGHPASS
+} filterType;
+
+
 typedef enum FILTER_ERROR_ENUM {
     FILT_NO_ERR,
     FILT_MEM_ERR,

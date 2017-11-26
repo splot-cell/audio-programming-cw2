@@ -8,10 +8,10 @@
 #include "prog_header.h"
 
 
-int main( int argc, const char * argv[] ) {
+int main( int argc, char * argv[] ) {
     
     /* Check correct number of arguments are supplied */
-    if ( commandLineArgumentHandler( argc, argv ) != 0 ) {
+    if ( commandLineArgumentHandler( argc, argv ) != NO_ERR ) {
         fatalError( BAD_COMMAND_LINE,
                    "Run with zero additional command line arguments to print help." );
     }

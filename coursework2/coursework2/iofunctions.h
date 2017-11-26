@@ -9,16 +9,18 @@
 #define iofunctions_h
 
 #include <stdbool.h> // For booleans.
-#include <string.h> // For strlen()
+#include <string.h> // For strlen() and strcmp().
+#include <getopt.h> // For getopt().
 
 #include "firfilter.h"
-#include "sndfile.h"
-#include "errors.h"
+#include "sndfile.h" // For audio file manipulation.
+
+#include "errors.h" // Program errors.
 
 
 /* DATA TYPES */
 
-typedef struct userInputStrings_struct userInputStrings;
+typedef struct userInput_struct userInput;
 
 typedef struct audioFile_struct audioFile;
 
@@ -32,11 +34,12 @@ bool isOnlyPositiveInt( const char *string );
 
 
 /*      commandLineArgumentHandler()
- * Checks the number of arguments supplied.
- *  - One argument = print help and exit program.
- *  - Four arguments = return 0.
- *  - Else = invalid, return -1. */
-int commandLineArgumentHandler( int argc, char *argv[] );
+ * Handles optioinal user arguments and required user arguements.
+ * <argc> = argc command line argument count.
+ * <argv> = argv command line argument array.
+ * <userOptions> = pointer to userInput variable where the options will be stored.
+ *  */
+int commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions );
 
 
 int interpretOptionalArgs();
