@@ -8,7 +8,8 @@
 #ifndef errors_h
 #define errors_h
 
-#include <stdio.h>
+#include <stdlib.h> // For exit().
+#include <stdio.h> // For fprintf().
 
 
 /* DATA TYPES */

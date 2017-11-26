@@ -14,7 +14,7 @@ int main( int argc, char * argv[] ) {
         printHelp();
     }
     
-    userInput *userData;
+    userInput *userData = createUserDataStruct();
     
     /* Check correct number of arguments are supplied */
     if ( commandLineArgumentHandler( argc, argv, userData ) != NO_ERR ) {
@@ -27,7 +27,7 @@ int main( int argc, char * argv[] ) {
     firFilter *filter;
     
     /* Sanitise input and populate pointers */
-    else if ( interpretUserInput( argc, argv, inputFile, outputFile, filter ) != 0 ) {
+    if ( initialiseVar( userData, inputFile, outputFile, filter ) != NO_ERR ) {
         return BAD_COMMAND_LINE;
     }
     
@@ -37,7 +37,7 @@ int main( int argc, char * argv[] ) {
     }
     
     /* Free memory */
-    cleanupMemory( inputFile, outputFile, filter );
+    cleanupMemory( userData, inputFile, outputFile, filter );
     
     return NO_ERR;
 }
