@@ -10,8 +10,14 @@
 
 int main( int argc, char * argv[] ) {
     
+    if ( argc == 1 ) {
+        printHelp();
+    }
+    
+    userInput *userData;
+    
     /* Check correct number of arguments are supplied */
-    if ( commandLineArgumentHandler( argc, argv ) != NO_ERR ) {
+    if ( commandLineArgumentHandler( argc, argv, userData ) != NO_ERR ) {
         fatalError( BAD_COMMAND_LINE,
                    "Run with zero additional command line arguments to print help." );
     }

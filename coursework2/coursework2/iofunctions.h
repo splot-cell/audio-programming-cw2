@@ -8,19 +8,16 @@
 #ifndef iofunctions_h
 #define iofunctions_h
 
+#include <stdlib.h> // For calloc() and free().
 #include <stdbool.h> // For booleans.
-#include <string.h> // For strlen() and strcmp().
-#include <getopt.h> // For getopt().
+#include <string.h> // For strlen().
 
-#include "firfilter.h"
 #include "sndfile.h" // For audio file manipulation.
 
 #include "errors.h" // Program errors.
 
 
 /* DATA TYPES */
-
-typedef struct userInput_struct userInput;
 
 typedef struct audioFile_struct audioFile;
 
@@ -31,22 +28,6 @@ typedef struct audioFile_struct audioFile;
  * Input of a <string>. Each character is evaluated in turn.
  * Returns true if each character is a numerial digit '0' to '9'. */
 bool isOnlyPositiveInt( const char *string );
-
-
-/*      commandLineArgumentHandler()
- * Handles optioinal user arguments and required user arguements.
- * <argc> = argc command line argument count.
- * <argv> = argv command line argument array.
- * <userOptions> = pointer to userInput variable where the options will be stored.
- *  */
-int commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions );
-
-
-int interpretOptionalArgs();
-
-
-int interpretUserInput( int argc, char *argv[], audioFile *inputFile, audioFile *outputFile, firFilter *filter );
-
 
 
 /* For audio file manipulation */
