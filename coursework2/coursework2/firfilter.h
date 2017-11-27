@@ -74,4 +74,5 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
  * */
 firErr processBuffer( firFilter *filter, double *buffer, int numSamples );
 
+
 #endif // firfilter_h

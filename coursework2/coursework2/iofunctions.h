@@ -30,6 +30,19 @@ typedef struct audioFile_struct audioFile;
 bool isOnlyPositiveInt( const char *string );
 
 
+/*      isWavFilename()
+ * Checks last four characters of <string> are '.wav'.
+ * Returns true if so, or false otherwise. */
+bool isWavFilename( const char *string );
+
+
+/*      getYesNo()
+ * Gets a character from stdin.
+ *  - If 'y' or 'Y' returns true.
+ *  - If anything else returns false. */
+bool getYesNo( void );
+
+
 /* For audio file manipulation */
 
 /*      openInputFile()

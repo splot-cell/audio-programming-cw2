@@ -42,9 +42,36 @@ void isOnlyPInt_isCorrect( qunittest_t *test ) {
 }
 
 
+void isWav_isCorrect( qunittest_t *test ) {
+    char *testString = "hello.wav";
+    qtest_assert_true( isWavFilename( testString ), "Identifies hello.wav", test );
+    
+    char *testString2 = ".wav";
+    qtest_assert_true( !isWavFilename( testString2 ), "Identifies string too short", test );
+    
+    char *testString3 = "a.wav";
+    qtest_assert_true( isWavFilename( testString3 ), "Identifies string just long enough", test );
+    
+    char *testString4 = "hello.waq";
+    qtest_assert_true( !isWavFilename( testString4 ), "Identifies hello.waq", test );
+    
+    char *testString5 = "hello.w!v";
+    qtest_assert_true( !isWavFilename( testString5 ), "Identifies hello.w!v", test );
+    
+    char *testString6 = "hello.pav";
+    qtest_assert_true( !isWavFilename( testString6 ), "Identifies hello.pav", test );
+    
+    char *testString7 = "hello,wav";
+    qtest_assert_true( !isWavFilename( testString7 ), "Identifies hello,wav", test );
+}
+
+
 void addUITests( qtestsuite_t *testsuite ) {
-    qunittest_t *isOnlyInt = add_qunittest( "Only integer santiation", testsuite );
+    qunittest_t *isOnlyInt = add_qunittest( "Only integer sanitisation", testsuite );
     isOnlyPInt_isCorrect( isOnlyInt );
+    
+    qunittest_t *isWav = add_qunittest( "Only .wav sanitisation", testsuite );
+    isWav_isCorrect( isWav );
 }
 
 

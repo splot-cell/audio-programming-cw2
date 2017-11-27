@@ -30,6 +30,9 @@ typedef struct userInput_struct {
 void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions );
 
 
+void allocFilenameMem( char **filename, unsigned long length );
+
+
 /* FUNCTION DEFINITIONS */
 
 userInput* createUserDataStruct( void ) {
@@ -45,6 +48,8 @@ int destroyUserDataStruct( userInput *data ) {
     if ( data == NULL ) {
         return NULL_FUNC_ARG;
     }
+    free( data->inputFilename );
+    free( data->outputFilename );
     free( data );
     return NO_ERR;
 }
@@ -64,24 +69,55 @@ int commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions )
         fatalError( BAD_COMMAND_LINE, "Could not continue, incorrect number of arguments detected." );
     }
     
-    //printf( "%d\n", providedArg );
-    printf( "%d\n", providedArg );
+    /* Allocate memory for filnames, adding 6 additional characters for '.wav\0'. */
+    allocFilenameMem( &userOptions->inputFilename, strlen( argv[ argc - 3 ] ) + 6 );
+    allocFilenameMem( &userOptions->outputFilename, strlen( argv[ argc - 3 ] ) + 6 );
     
-//    for ( int i = argc - 3; i < argc; ++ i ) {
-//        printf( "%s\n", argv[ i ] );
-//    }
+    strcpy( userOptions->inputFilename, argv[ argc - 3] );
+    strcpy( userOptions->outputFilename, argv[ argc - 2] );
     
+    if ( isWavFilename( userOptions->inputFilename ) == false ) {
+        printf( "Input filename '%s' not recognised as '*.wav'. Would you like to append '.wav'? (y/n)\n",
+               userOptions->inputFilename );
+        if ( getYesNo() ) {
+            strcat( userOptions->inputFilename, ".wav" );
+        }
+        else {
+            cleanupMemory( userOptions, NULL, NULL, NULL );
+            exit( NO_ERR );
+        }
+    }
+    if ( isWavFilename( userOptions->outputFilename ) == false ) {
+        printf( "Output filename '%s' not recognised as '*.wav'. Would you like to append '.wav'? (y/n)\n",
+               userOptions->outputFilename );
+        if ( getYesNo() ) {
+            strcat( userOptions->outputFilename, ".wav" );
+        }
+        else {
+            cleanupMemory( userOptions, NULL, NULL, NULL );
+            exit( NO_ERR );
+        }
+    }
+    
+    printf( "%s\n", userOptions->inputFilename );
     
     return NO_ERR;
 }
 
 
 void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
+    struct option optionalArgs[] = {
+        { "window", required_argument, 0, 'w' },
+        { "highpass", no_argument, 0, 'h' },
+        { "buffersize", required_argument, 0, 'b' },
+        { 0, 0, 0, 0 }
+    };
+    int optionIndex = 0;
     char option;
-    while ( ( option = getopt( argc, argv, "w:h" ) ) != -1 ) {
+    
+    while ( ( option = getopt_long( argc, argv, "w:hb", optionalArgs, &optionIndex ) ) != -1 ) {
         switch ( option ) {
             case 'w':
-                printf( "%s", optarg );
                 if ( strcmp( optarg, "rect" ) == 0 ) {
                     userOptions->windowing = WINDOW_RECTANGULAR;
                 }
@@ -99,7 +135,8 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
                 }
                 else {
                     fprintf( stderr,
-                            "Invalid option for windowing. Will try to continue using default: bartlett.\n" );
+                            "Invalid option '%s' for windowing.\nWill try to continue using default: bartlett.\n",
+                            optarg );
                 }
                 break;
             case 'h':
@@ -123,9 +160,17 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
     }
 }
 
+        
+void allocFilenameMem( char **filename, unsigned long length ) {
+    *filename = calloc( length, sizeof( char ) );
+    if ( filename == NULL ) {
+        fatalError( BAD_MEMORY, "Could not allocate memory for filename." );
+    }
+}
+        
 
 void cleanupMemory( userInput *userOptions, audioFile *inputFile, audioFile *outputFile, firFilter *filter ) {
-    destroyUserDataStruct( userOptions );
+    destroyUserDataStruct( userOptions ); // No need to check if NULL as cleaning nothing is fine
     closeAudioFile( inputFile );
     closeAudioFile( outputFile );
     destroyFilter( filter );

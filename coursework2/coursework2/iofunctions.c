@@ -35,6 +35,31 @@ bool isOnlyPositiveInt( const char *string ) {
 }
 
 
+bool isWavFilename( const char *string ) {
+    unsigned long length = strlen( string );
+    if ( length < 5 ) {
+        return false;
+    }
+    if ( string[ length - 4 ] == '.' && string[ length - 3 ] == 'w' &&
+        string[ length - 2 ] == 'a' && string[ length - 1 ] == 'v' ) {
+        return true;
+    }
+    return false;
+}
+
+
+bool getYesNo( void ) {
+    char c;
+    scanf( " %c", &c );
+    if ( c == 'y' || c == 'Y' ) {
+        // FLUSH STD IN
+        return true;
+    }
+    // FLUSH STD IN
+    return false;
+}
+
+
 /* For audio IO */
 
 audioFile* openInputFile( char *filename ) {

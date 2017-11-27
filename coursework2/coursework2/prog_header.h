@@ -10,9 +10,9 @@
 #define prog_header_h
 
 #include <stdlib.h> // For calloc() and free().
-#include <stdio.h> // For printf(), fprintf(), sprintf().
+#include <stdio.h> // For printf(), fprintf(), sprintf(), getchar().
 #include <string.h> // For strcomp().
-#include <unistd.h> // For getopt().
+#include <getopt.h> // For getopt().
 #include <ctype.h> // For isprint().
 
 #include "iofunctions.h" // Deals with audio files and non-progam-specific i/o functions.
