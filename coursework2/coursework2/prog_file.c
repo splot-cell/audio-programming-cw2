@@ -59,6 +59,17 @@ void printHelp( void ) {
 int commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
     optionalArgumentHandler( argc, argv, userOptions );
     
+    int providedArg = argc - optind;
+    if ( providedArg != 3 ) {
+        fatalError( BAD_COMMAND_LINE, "Could not continue, incorrect number of arguments detected." );
+    }
+    
+    //printf( "%d\n", providedArg );
+    printf( "%d\n", providedArg );
+    
+//    for ( int i = argc - 3; i < argc; ++ i ) {
+//        printf( "%s\n", argv[ i ] );
+//    }
     
     
     return NO_ERR;
@@ -70,23 +81,25 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
     while ( ( option = getopt( argc, argv, "w:h" ) ) != -1 ) {
         switch ( option ) {
             case 'w':
-                if ( strcmp( optarg, "rect" ) ) {
+                printf( "%s", optarg );
+                if ( strcmp( optarg, "rect" ) == 0 ) {
                     userOptions->windowing = WINDOW_RECTANGULAR;
                 }
-                else if ( strcmp( optarg, "bart" ) ) {
+                else if ( strcmp( optarg, "bart" ) == 0 ) {
                     userOptions->windowing = WINDOW_BARTLETT;
                 }
-                else if ( strcmp( optarg, "hann" ) ) {
+                else if ( strcmp( optarg, "hann" ) == 0 ) {
                     userOptions->windowing = WINDOW_HANNING;
                 }
-                else if ( strcmp( optarg, "hamm" ) ) {
+                else if ( strcmp( optarg, "hamm" ) == 0 ) {
                     userOptions->windowing = WINDOW_HAMMING;
                 }
-                else if ( strcmp( optarg, "black" ) ) {
+                else if ( strcmp( optarg, "black" ) == 0 ) {
                     userOptions->windowing = WINDOW_BLACKMAN;
                 }
                 else {
-                    fprintf( stderr, "Invalid option for windowing. Using default: bartlett.\n" );
+                    fprintf( stderr,
+                            "Invalid option for windowing. Will try to continue using default: bartlett.\n" );
                 }
                 break;
             case 'h':

@@ -36,7 +36,7 @@ void applyHammingWindow( firFilter *filter );
 
 void applyBlackmanWindow( firFilter *filter );
 
-void fatalError( firErr code, char *info );
+void filterfatalError( firErr code, char *info );
 
 
 /* FUNCTION DEFINITIONS */
@@ -44,13 +44,13 @@ void fatalError( firErr code, char *info );
 firFilter* createFilter( int order, double *circularBuffer ) {
     firFilter *filter = malloc( sizeof( firFilter ) );
     if ( filter == NULL ) {
-        fatalError( FILT_MEM_ERR, "Could not allocate filter memory." );
+        filterfatalError( FILT_MEM_ERR, "Could not allocate filter memory." );
     }
     
     filter->coeffs = calloc ( order + 1, sizeof( double ) );
     if ( filter->coeffs == NULL ) {
         free( filter ); // Tidy up.
-        fatalError( FILT_MEM_ERR, "Could not allocate coefficient memory." );
+        filterfatalError( FILT_MEM_ERR, "Could not allocate coefficient memory." );
     }
     
     filter->numCoeffs = order + 1;
@@ -58,7 +58,7 @@ firFilter* createFilter( int order, double *circularBuffer ) {
     filter->delayLineIndex = 0;
     
     if ( initDelayLine( filter ) != FILT_NO_ERR ) {
-        fatalError( FILT_MEM_ERR, "Error initialising filter: NULL filter address." );
+        filterfatalError( FILT_MEM_ERR, "Error initialising filter: NULL filter address." );
     }
     
     return filter;
@@ -70,7 +70,7 @@ firErr destroyFilter( firFilter *filter ) {
         return FILT_ARG_NULL;
     }
     if ( filter->coeffs == NULL ) {
-        fatalError( FILT_MEM_ERR, "Filter coefficients NULL." );
+        filterfatalError( FILT_MEM_ERR, "Filter coefficients NULL." );
     }
     
     free( filter->coeffs );
@@ -184,7 +184,7 @@ void applyBlackmanWindow( firFilter *filter ) {
 }
 
 
-void fatalError( firErr code, char *info ) {
+void filterfatalError( firErr code, char *info ) {
     fprintf( stderr, "FIR FILTER ERROR: %s\n", info );
     exit( code );
 }

@@ -26,16 +26,16 @@ int main( int argc, char * argv[] ) {
     audioFile *inputFile, *outputFile;
     firFilter *filter;
     
-    /* Sanitise input and populate pointers */
-    if ( initialiseVar( userData, inputFile, outputFile, filter ) != NO_ERR ) {
-        return BAD_COMMAND_LINE;
-    }
-    
-    /* Proess audio files */
-    else if ( processAudio( inputFile, outputFile, filter ) != 0 ) {
-        
-    }
-    
+//    /* Sanitise input and populate pointers */
+//    if ( initialiseVar( userData, inputFile, outputFile, filter ) != NO_ERR ) {
+//        return BAD_COMMAND_LINE;
+//    }
+//    
+//    /* Proess audio files */
+//    else if ( processAudio( inputFile, outputFile, filter ) != 0 ) {
+//        
+//    }
+//    
     /* Free memory */
     cleanupMemory( userData, inputFile, outputFile, filter );
     
