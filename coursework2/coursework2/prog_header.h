@@ -48,9 +48,8 @@ int destroyUserDataStruct( userInput *data );
  * Handles user arguements. Sanitises and stores.
  * <argc> = argc command line argument count.
  * <argv> = argv command line argument array.
- * <userOptions> = pointer to userInput variable where the options will be stored.
- *  */
-int commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions );
+ * <userOptions> = pointer to userInput variable where the options will be stored. */
+void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions );
 
 
 int initialiseVar( userInput *userOptions, audioFile *inputFile, audioFile *outputFile, firFilter *filter );

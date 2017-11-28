@@ -9,6 +9,7 @@
 #include "prog_header.h"
 
 #include <stdbool.h> // For booleans.
+#include <limits.h> // For converting integers.
 
 
 /* TYPE DEFINITIONS */
@@ -16,6 +17,7 @@
 typedef struct userInput_struct {
     char *inputFilename;
     char *outputFilename;
+    int filterFrequncy;
     filterType filterType;
     firWindow windowing;
     int bufferSize;
@@ -36,6 +38,9 @@ void allocFilenameMem( char **filename, unsigned long length );
 
 
 bool wavFilenameHandler( char **filename, char mode );
+
+
+int strToInt( char *str, int lowerLimit, int upperLimit, char *label );
 
 
 /* FUNCTION DEFINITIONS */
@@ -66,7 +71,7 @@ void printHelp( void ) {
 }
 
 
-int commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
+void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
     optionalArgumentHandler( argc, argv, userOptions );
     
     int providedArg = argc - optind;
@@ -87,9 +92,11 @@ int commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions )
         exit( NO_ERR );
     }
     
-    
-    
-    return NO_ERR;
+    /* Check characters and range of requested frequency */
+    if ( isOnlyPositiveInt( argv[ argc - 1 ] ) == false ) {
+        fatalError( BAD_COMMAND_LINE, "Non-integer character detected in cut-off frequency" );
+    }
+    userOptions->filterFrequncy = strToInt( argv[ argc - 1], 20, 20000, "filter frequency" );
 }
 
 
@@ -103,7 +110,7 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
     int optionIndex = 0;
     char option;
     
-    while ( ( option = getopt_long( argc, argv, "w:hb", optionalArgs, &optionIndex ) ) != -1 ) {
+    while ( ( option = getopt_long( argc, argv, "w:hb:", optionalArgs, &optionIndex ) ) != -1 ) {
         switch ( option ) {
             case 'w':
                 if ( strcmp( optarg, "rect" ) == 0 ) {
@@ -172,6 +179,17 @@ void allocFilenameMem( char **filename, unsigned long length ) {
     if ( filename == NULL ) {
         fatalError( BAD_MEMORY, "Could not allocate memory for filename." );
     }
+}
+
+
+int strToInt( char *str, int lowerLimit, int upperLimit, char *label ) {
+    long int x = strtol( str, NULL, 10 ); // More robust conversion than atoi.
+    if ( x > upperLimit || x < lowerLimit ) {
+        char error[ 100 ];
+        sprintf( error, "The number %s is out of range for %s.", str, label );
+        fatalError( BAD_COMMAND_LINE, error );
+    }
+    return (int) x;
 }
         
 
