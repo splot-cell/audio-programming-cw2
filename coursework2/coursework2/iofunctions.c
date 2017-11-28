@@ -16,6 +16,11 @@ typedef struct audioFile_struct {
 } audioFile;
 
 
+/* PRIVATE FUNCTION PROTOTYPES */
+
+void flushStdIn( void );
+
+
 /* FUNCTION DEFINITIONS */
 
 bool isOnlyPositiveInt( const char *string ) {
@@ -51,12 +56,17 @@ bool isWavFilename( const char *string ) {
 bool getYesNo( void ) {
     char c;
     scanf( " %c", &c );
+    flushStdIn();
     if ( c == 'y' || c == 'Y' ) {
-        // FLUSH STD IN
         return true;
     }
-    // FLUSH STD IN
     return false;
+}
+
+
+void flushStdIn( void ) {
+    int c;
+    while ( ( c = getchar() ) != '\n' && c != EOF );
 }
 
 

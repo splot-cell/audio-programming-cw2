@@ -8,6 +8,8 @@
 
 #include "prog_header.h"
 
+#include <stdbool.h> // For booleans.
+
 
 /* TYPE DEFINITIONS */
 
@@ -31,6 +33,9 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions );
 
 
 void allocFilenameMem( char **filename, unsigned long length );
+
+
+bool wavFilenameHandler( char **filename, char mode );
 
 
 /* FUNCTION DEFINITIONS */
@@ -76,30 +81,13 @@ int commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions )
     strcpy( userOptions->inputFilename, argv[ argc - 3] );
     strcpy( userOptions->outputFilename, argv[ argc - 2] );
     
-    if ( isWavFilename( userOptions->inputFilename ) == false ) {
-        printf( "Input filename '%s' not recognised as '*.wav'. Would you like to append '.wav'? (y/n)\n",
-               userOptions->inputFilename );
-        if ( getYesNo() ) {
-            strcat( userOptions->inputFilename, ".wav" );
-        }
-        else {
-            cleanupMemory( userOptions, NULL, NULL, NULL );
-            exit( NO_ERR );
-        }
-    }
-    if ( isWavFilename( userOptions->outputFilename ) == false ) {
-        printf( "Output filename '%s' not recognised as '*.wav'. Would you like to append '.wav'? (y/n)\n",
-               userOptions->outputFilename );
-        if ( getYesNo() ) {
-            strcat( userOptions->outputFilename, ".wav" );
-        }
-        else {
-            cleanupMemory( userOptions, NULL, NULL, NULL );
-            exit( NO_ERR );
-        }
+    if ( wavFilenameHandler( &userOptions->inputFilename, 'i' ) == false ||
+            wavFilenameHandler( &userOptions->outputFilename, 'o' ) == false ) {
+        cleanupMemory( userOptions, NULL, NULL, NULL );
+        exit( NO_ERR );
     }
     
-    printf( "%s\n", userOptions->inputFilename );
+    
     
     return NO_ERR;
 }
@@ -158,6 +146,24 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
                 }
         }
     }
+}
+
+
+bool wavFilenameHandler( char **filename, char mode ) {
+    char str[ 8 ];
+    strcpy( str, ( mode == 'i' ? "Input" : "Output" ) );
+    
+    if ( isWavFilename( *filename ) == false ) {
+        printf( "%s filename '%s' not recognised as '*.wav'. Would you like to append '.wav'? (y/n)\n",
+               str, *filename );
+        if ( getYesNo() ) {
+            strcat( *filename, ".wav" );
+        }
+        else {
+            return false;
+        }
+    }
+    return true;
 }
 
         
