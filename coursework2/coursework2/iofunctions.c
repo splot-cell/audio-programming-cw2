@@ -77,7 +77,11 @@ audioFile* openInputFile( char *filename ) {
     if ( file == NULL ) {
         fatalError( BAD_MEMORY, "Could not allocate memory for input file." );
     }
+    
     file->audioFile = sf_open( filename, SFM_READ, &file->infoFile );
+    if ( file->audioFile == NULL ) {
+        fatalError( BAD_FILE_OPEN, "Could not open input file selected!" );
+    }
     
     return file;
 }
@@ -92,6 +96,9 @@ audioFile* openOutputFile( char *filename, audioFile settings, int filterOrder )
     file->infoFile.frames += filterOrder; // Output file must have additional frames
     
     file->audioFile = sf_open( filename, SFM_WRITE, &file->infoFile );
+    if ( file->audioFile == NULL ) {
+        fatalError( BAD_FILE_OPEN, "Could not open output file selected!" );
+    }
     
     return file;
 }

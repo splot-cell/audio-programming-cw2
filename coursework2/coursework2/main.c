@@ -21,17 +21,13 @@ int main( int argc, char * argv[] ) {
     /* Create pointers for input and output files, and the FIR filter */
     audioFile *inputFile, *outputFile;
     firFilter *filter;
+    double buffer[ g_maxBufferSize ];
+    double filterDelayLine[ g_filterOrder + 1 ];
     
-//    /* Sanitise input and populate pointers */
-//    if ( initialiseVar( userData, inputFile, outputFile, filter ) != NO_ERR ) {
-//        return BAD_COMMAND_LINE;
-//    }
-//    
-//    /* Proess audio files */
-//    else if ( processAudio( inputFile, outputFile, filter ) != 0 ) {
-//        
-//    }
-//    
+    /* Open files and create filter */
+    openFiles( userData, &inputFile, &outputFile );
+    createFilter( g_filterOrder, filterDelayLine );
+    
     /* Free memory */
     cleanupMemory( userData, inputFile, outputFile, filter );
     

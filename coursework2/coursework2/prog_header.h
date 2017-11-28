@@ -19,6 +19,12 @@
 #include "firfilter.h" // Deals with filtering.
 #include "errors.h" // Error codes are here.
 
+/* GLOBALS */
+extern const int g_minFilterFreq;
+extern const int g_maxFilterFreq;
+extern const int g_filterOrder;
+extern const int g_maxBufferSize;
+
 
 /* DATA TYPES */
 
@@ -52,7 +58,7 @@ int destroyUserDataStruct( userInput *data );
 void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions );
 
 
-int initialiseVar( userInput *userOptions, audioFile *inputFile, audioFile *outputFile, firFilter *filter );
+void openFiles( userInput *userData, audioFile **inputFile, audioFile **outputFile );
 
 
 /*      cleanupMemory()

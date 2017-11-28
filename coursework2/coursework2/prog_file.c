@@ -11,6 +11,13 @@
 #include <stdbool.h> // For booleans.
 #include <limits.h> // For converting integers.
 
+/* GLOBAL INITIALISATIONS */
+
+const int g_minFilterFreq = 20;
+const int g_maxFilterFreq = 20000;
+const int g_filterOrder = 126;
+const int g_maxBufferSize = 2048;
+
 
 /* TYPE DEFINITIONS */
 
@@ -96,7 +103,8 @@ void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions 
     if ( isOnlyPositiveInt( argv[ argc - 1 ] ) == false ) {
         fatalError( BAD_COMMAND_LINE, "Non-integer character detected in cut-off frequency" );
     }
-    userOptions->filterFrequncy = strToInt( argv[ argc - 1], 20, 20000, "filter frequency" );
+    userOptions->filterFrequncy = strToInt( argv[ argc - 1],
+                                           g_minFilterFreq, g_maxFilterFreq, "filter frequency" );
 }
 
 
@@ -155,6 +163,11 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
     }
 }
 
+void openFiles( userInput *userData, audioFile **inputFile, audioFile **outputFile ) {
+    *inputFile = openInputFile( userData->inputFilename );
+    *outputFile = openInputFile( userData->outputFilename );
+}
+
 
 bool wavFilenameHandler( char **filename, char mode ) {
     char str[ 8 ];
@@ -187,7 +200,7 @@ int strToInt( char *str, int lowerLimit, int upperLimit, char *label ) {
     if ( x > upperLimit || x < lowerLimit ) {
         char error[ 100 ];
         sprintf( error, "The number %s is out of range for %s.", str, label );
-        fatalError( BAD_COMMAND_LINE, error );
+        fatalError( OUT_OF_BOUNDS_VALUE, error );
     }
     return (int) x;
 }
