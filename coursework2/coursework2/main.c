@@ -10,6 +10,10 @@
 
 int main( int argc, char * argv[] ) {
     
+    /* Initialise dynamic memory tracking. */
+    initMemTracking();
+    
+    
     if ( argc == 1 ) {
         printHelp();
     }
@@ -33,6 +37,7 @@ int main( int argc, char * argv[] ) {
     /* Open files and create filter. */
     openFiles( userData, &inputFile, &outputFile );
     filter = createFilter( g_filterOrder, filterDelayLine );
+    memAllocated( filter );
     setCoefficients( filter, getSampleRate( inputFile ), userData->filterFrequncy, userData->windowing );
     
     /* Audio processing loop. */

@@ -75,12 +75,12 @@ void flushStdIn( void ) {
 audioFile* openInputFile( char *filename ) {
     audioFile *file = calloc( 1, sizeof( audioFile ) );
     if ( file == NULL ) {
-        fatalError( BAD_MEMORY, "Could not allocate memory for input file." );
+        programExit( BAD_MEMORY, "Could not allocate memory for input file." );
     }
     
     file->audioFile = sf_open( filename, SFM_READ, &file->infoFile );
     if ( file->audioFile == NULL ) {
-        fatalError( BAD_FILE_OPEN, "Could not open input file selected!" );
+        programExit( BAD_FILE_OPEN, "Could not open input file selected!" );
     }
     
     return file;
@@ -90,14 +90,14 @@ audioFile* openInputFile( char *filename ) {
 audioFile* openOutputFile( char *filename, audioFile settings, int filterOrder ) {
     audioFile *file = calloc( 1, sizeof( audioFile ) );
     if (file == NULL ) {
-        fatalError( BAD_MEMORY, "Could not allocate memory for output file." );
+        programExit( BAD_MEMORY, "Could not allocate memory for output file." );
     }
     file->infoFile = settings.infoFile; // Copy settings from input file
     file->infoFile.frames += filterOrder; // Output file must have additional frames
     
     file->audioFile = sf_open( filename, SFM_WRITE, &file->infoFile );
     if ( file->audioFile == NULL ) {
-        fatalError( BAD_FILE_OPEN, "Could not open output file selected!" );
+        programExit( BAD_FILE_OPEN, "Could not open output file selected!" );
     }
     
     return file;
@@ -143,7 +143,7 @@ int writeAudioDouble( audioFile *file, double *buffer, int numSamples ) {
     }
     int written = (int) sf_write_double( file->audioFile, buffer, numSamples );
     if ( written != numSamples ) {
-        fatalError( BAD_FILE_WRITE, "Could not write buffer to output file." );
+        programExit( BAD_FILE_WRITE, "Could not write buffer to output file." );
     }
     return written;
 }

@@ -49,8 +49,11 @@ int strToInt( char *str, int lowerLimit, int upperLimit, char *label );
 userInput* createUserDataStruct( void ) {
     userInput *data = calloc( 1, sizeof( userInput ) );
     if ( data == NULL ) {
-        fatalError( BAD_MEMORY, "Could not allocate memory for user input." );
+        programExit( BAD_MEMORY, "Could not allocate memory for user input." );
     }
+    memAllocated( data );
+    data->inputFilename = NULL;
+    data->outputFilename = NULL;
     return data;
 }
 
@@ -59,8 +62,12 @@ int destroyUserDataStruct( userInput *data ) {
     if ( data == NULL ) {
         return NULL_FUNC_ARG;
     }
-    free( data->inputFilename );
-    free( data->outputFilename );
+    if ( data->inputFilename != NULL ) {
+        free( data->inputFilename );
+    }
+    if ( data->outputFilename != NULL ) {
+        free( data->outputFilename );
+    }
     free( data );
     return NO_ERR;
 }
@@ -77,7 +84,7 @@ void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions 
     
     int providedArg = argc - optind;
     if ( providedArg != 3 ) {
-        fatalError( BAD_COMMAND_LINE, "Could not continue, incorrect number of arguments detected." );
+        programExit( BAD_COMMAND_LINE, "Could not continue, incorrect number of arguments detected." );
     }
     
     /* Allocate memory for filnames, adding 6 additional characters for '.wav\0'. */
@@ -95,7 +102,7 @@ void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions 
     
     /* Check characters and range of requested frequency */
     if ( isOnlyPositiveInt( argv[ argc - 1 ] ) == false ) {
-        fatalError( BAD_COMMAND_LINE, "Non-integer character detected in cut-off frequency" );
+        programExit( BAD_COMMAND_LINE, "Non-integer character detected in cut-off frequency" );
     }
     userOptions->filterFrequncy = strToInt( argv[ argc - 1],
                                            g_minFilterFreq, g_maxFilterFreq, "filter frequency" );
@@ -141,11 +148,11 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
                 break;
             case 'b':
                 if ( isOnlyPositiveInt( optarg ) == false ) {
-                    fatalError( BAD_COMMAND_LINE, "Buffer size must be a positive integer." );
+                    programExit( BAD_COMMAND_LINE, "Buffer size must be a positive integer." );
                 }
                 userOptions->bufferSize = strToInt( optarg, g_minBufferSize, g_maxBufferSize, "buffer size" );
                 if ( ( userOptions->bufferSize % g_minBufferSize ) != 0 ) {
-                    fatalError( BAD_COMMAND_LINE, "Buffer size must be a power of 2." );
+                    programExit( BAD_COMMAND_LINE, "Buffer size must be a power of 2." );
                 }
                 break;
             case '?':
@@ -155,12 +162,12 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
                 else if ( isprint( optopt ) ) {
                     char error[100];
                     sprintf( error, "Unknown option '-%c'.", optopt );
-                    fatalError( BAD_COMMAND_LINE, error );
+                    programExit( BAD_COMMAND_LINE, error );
                 }
                 else {
                     char error[100];
                     sprintf( error, "Unknown option character '\\x%x'.\n", optopt );
-                    fatalError( BAD_COMMAND_LINE, error );
+                    programExit( BAD_COMMAND_LINE, error );
                 }
         }
     }
@@ -193,8 +200,9 @@ bool wavFilenameHandler( char **filename, char mode ) {
 void allocFilenameMem( char **filename, unsigned long length ) {
     *filename = calloc( length, sizeof( char ) );
     if ( filename == NULL ) {
-        fatalError( BAD_MEMORY, "Could not allocate memory for filename." );
+        programExit( BAD_MEMORY, "Could not allocate memory for filename." );
     }
+    memAllocated( filename );
 }
 
 
@@ -203,7 +211,7 @@ int strToInt( char *str, int lowerLimit, int upperLimit, char *label ) {
     if ( x > upperLimit || x < lowerLimit ) {
         char error[ 100 ];
         sprintf( error, "The number %s is out of range for %s.", str, label );
-        fatalError( OUT_OF_BOUNDS_VALUE, error );
+        programExit( OUT_OF_BOUNDS_VALUE, error );
     }
     return (int) x;
 }

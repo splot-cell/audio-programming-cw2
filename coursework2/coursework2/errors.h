@@ -27,9 +27,16 @@ enum ERR {
 
 /* FUNCTION PROTOTYPES */
 
+
+void initMemTracking( void );
+
+
+void memAllocated( void *ptr );
+
+
 /*      fatalError()
- * Helper function for printing error code and exiting program. */
-void fatalError( int code, char *info );
+ * Helper function for deallocating memory, printing error code, and exiting program. */
+void programExit( int code, char *info );
 
 
 #endif // errors_h
