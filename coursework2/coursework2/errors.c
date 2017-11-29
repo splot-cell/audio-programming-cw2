@@ -19,7 +19,7 @@ static FILE *g_temp;
 void initMemTracking( void ) {
     g_temp = tmpfile();
     if ( g_temp == NULL ) {
-        fprintf( stderr, "Error initialising tempory file.\n" );
+        fprintf( stderr, "Error initialising program memory temporary file.\n" );
         exit( BAD_FILE_OPEN );
     }
 }

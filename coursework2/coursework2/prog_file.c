@@ -19,6 +19,8 @@ const int g_filterOrder = 126;
 const int g_maxBufferSize = 2048;
 const int g_minBufferSize = 64;
 
+static FILE *g_tempFiles;
+
 
 /* TYPE DEFINITIONS */
 
@@ -44,12 +46,18 @@ bool wavFilenameHandler( char **filename, char mode );
 int strToInt( char *str, int lowerLimit, int upperLimit, char *label );
 
 
+void fileOpened( audioFile *ptr );
+
+
+void closeOpenFiles( void );
+
+
 /* FUNCTION DEFINITIONS */
 
 userInput* createUserDataStruct( void ) {
     userInput *data = calloc( 1, sizeof( userInput ) );
     if ( data == NULL ) {
-        programExit( BAD_MEMORY, "Could not allocate memory for user input." );
+        errorHandler( BAD_MEMORY, "Could not allocate memory for user input." );
     }
     memAllocated( data );
     data->inputFilename = NULL;
@@ -84,7 +92,7 @@ void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions 
     
     int providedArg = argc - optind;
     if ( providedArg != 3 ) {
-        programExit( BAD_COMMAND_LINE, "Could not continue, incorrect number of arguments detected." );
+        errorHandler( BAD_COMMAND_LINE, "Could not continue, incorrect number of arguments detected." );
     }
     
     /* Allocate memory for filnames, adding 6 additional characters for '.wav\0'. */
@@ -96,13 +104,12 @@ void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions 
     
     if ( wavFilenameHandler( &userOptions->inputFilename, 'i' ) == false ||
             wavFilenameHandler( &userOptions->outputFilename, 'o' ) == false ) {
-        cleanupMemory( userOptions, NULL, NULL, NULL );
-        exit( NO_ERR );
+        errorHandler( NO_ERR, "" );
     }
     
     /* Check characters and range of requested frequency */
     if ( isOnlyPositiveInt( argv[ argc - 1 ] ) == false ) {
-        programExit( BAD_COMMAND_LINE, "Non-integer character detected in cut-off frequency" );
+        errorHandler( BAD_COMMAND_LINE, "Non-integer character detected in cut-off frequency" );
     }
     userOptions->filterFrequncy = strToInt( argv[ argc - 1],
                                            g_minFilterFreq, g_maxFilterFreq, "filter frequency" );
@@ -148,11 +155,11 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
                 break;
             case 'b':
                 if ( isOnlyPositiveInt( optarg ) == false ) {
-                    programExit( BAD_COMMAND_LINE, "Buffer size must be a positive integer." );
+                    errorHandler( BAD_COMMAND_LINE, "Buffer size must be a positive integer." );
                 }
                 userOptions->bufferSize = strToInt( optarg, g_minBufferSize, g_maxBufferSize, "buffer size" );
                 if ( ( userOptions->bufferSize % g_minBufferSize ) != 0 ) {
-                    programExit( BAD_COMMAND_LINE, "Buffer size must be a power of 2." );
+                    errorHandler( BAD_COMMAND_LINE, "Buffer size must be a power of 2." );
                 }
                 break;
             case '?':
@@ -162,20 +169,37 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
                 else if ( isprint( optopt ) ) {
                     char error[100];
                     sprintf( error, "Unknown option '-%c'.", optopt );
-                    programExit( BAD_COMMAND_LINE, error );
+                    errorHandler( BAD_COMMAND_LINE, error );
                 }
                 else {
                     char error[100];
                     sprintf( error, "Unknown option character '\\x%x'.\n", optopt );
-                    programExit( BAD_COMMAND_LINE, error );
+                    errorHandler( BAD_COMMAND_LINE, error );
                 }
         }
     }
 }
 
 void openFiles( userInput *userData, audioFile **inputFile, audioFile **outputFile ) {
-    *inputFile = openInputFile( userData->inputFilename );
-    *outputFile = openInputFile( userData->outputFilename );
+    
+    if ( ( *inputFile = allocateAudioFileMem() ) == NULL ) {
+        errorHandler( BAD_MEMORY, "Could not allocate memory for input file." );
+    }
+    
+    if ( openInputFile( *inputFile, userData->inputFilename ) != NO_ERR ) {
+        errorHandler( BAD_FILE_OPEN, "Could not open input file selected!" );
+    }
+    fileOpened( *inputFile );
+    
+    
+    if ( ( *outputFile = allocateAudioFileMem() ) == NULL ) {
+        errorHandler( BAD_MEMORY, "Could not allocate memory for output file." );
+    }
+    
+    if ( openOutputFile( *outputFile, userData->inputFilename, *inputFile, g_filterOrder ) != NO_ERR ) {
+        errorHandler( BAD_FILE_OPEN, "Could not open output file selected!" );
+    }
+    fileOpened( *outputFile );
 }
 
 
@@ -199,10 +223,10 @@ bool wavFilenameHandler( char **filename, char mode ) {
         
 void allocFilenameMem( char **filename, unsigned long length ) {
     *filename = calloc( length, sizeof( char ) );
-    if ( filename == NULL ) {
-        programExit( BAD_MEMORY, "Could not allocate memory for filename." );
+    if ( *filename == NULL ) {
+        errorHandler( BAD_MEMORY, "Could not allocate memory for filename." );
     }
-    memAllocated( filename );
+    memAllocated( *filename );
 }
 
 
@@ -211,9 +235,42 @@ int strToInt( char *str, int lowerLimit, int upperLimit, char *label ) {
     if ( x > upperLimit || x < lowerLimit ) {
         char error[ 100 ];
         sprintf( error, "The number %s is out of range for %s.", str, label );
-        programExit( OUT_OF_BOUNDS_VALUE, error );
+        errorHandler( OUT_OF_BOUNDS_VALUE, error );
     }
     return (int) x;
+}
+
+
+void initFileTracking( void ) {
+    g_tempFiles = tmpfile();
+    if ( g_tempFiles == NULL ) {
+        filtFreeMem();
+        programExit( BAD_FILE_OPEN, "Error initialising file-tracking temporary file." );
+    }
+}
+
+
+void fileOpened( audioFile *ptr ) {
+    fprintf( g_tempFiles, "%p ", ptr );
+}
+
+
+void closeOpenFiles( void ) {
+    rewind( g_tempFiles );
+    audioFile *ptr;
+    
+    while ( fscanf( g_tempFiles, "%p", &ptr ) != EOF ) {
+        closeAudioFile( ptr );
+    }
+    
+    fclose( g_tempFiles );
+}
+
+
+void errorHandler( int code, char *info ) {
+    filtFreeMem(); // Prevent memory leaks from filter.
+    closeOpenFiles(); // Prevent hanging files.
+    programExit( code, info );
 }
         
 

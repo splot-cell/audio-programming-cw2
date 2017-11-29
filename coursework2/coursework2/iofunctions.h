@@ -45,10 +45,13 @@ bool getYesNo( void );
 
 /* For audio file manipulation */
 
+audioFile* allocateAudioFileMem( void );
+
+
 /*      openInputFile()
  * Opens audio file called <filename> in read mode.
  * Returns pointer to the file if successful. */
-audioFile* openInputFile( char *filename );
+int openInputFile( audioFile *file, char *filename );
 
 
 /*      openOutputFile()
@@ -56,7 +59,7 @@ audioFile* openInputFile( char *filename );
  * <settings> = input file, so that the settigs may be reused.
  * <filterOrder> = the order of the filter to be applied, as output file must contain additional samples.
  * Returns pointer to the file if successful. */
-audioFile* openOutputFile( char *filename, audioFile settings, int filterOrder ); // Could change to take in filter
+int openOutputFile( audioFile *file, char *filename, audioFile *settings, int filterOrder );
 
 
 /*      closeAudioFile()

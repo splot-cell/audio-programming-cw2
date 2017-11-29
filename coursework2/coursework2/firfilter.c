@@ -13,6 +13,10 @@
 const double g_pi = 3.14159265359;
 const double g_tau = 2 * g_pi;
 
+firErr g_FILT_ERR;
+
+static FILE *g_filtTemp;
+
 
 /* TYPE DEFINITIONS */
 
@@ -38,19 +42,30 @@ void applyBlackmanWindow( firFilter *filter );
 
 void filterfatalError( firErr code, char *info );
 
+firErr filtMemAllocated( void *ptr );
+
 
 /* FUNCTION DEFINITIONS */
 
 firFilter* createFilter( int order, double *circularBuffer ) {
     firFilter *filter = malloc( sizeof( firFilter ) );
     if ( filter == NULL ) {
-        filterfatalError( FILT_MEM_ERR, "Could not allocate filter memory." );
+        g_FILT_ERR = FILT_MEM_ERR;
+        return NULL;
+    }
+    if ( filtMemAllocated( filter ) != FILT_NO_ERR ) {
+        g_FILT_ERR = FILT_FILE_ERR;
+        return NULL;
     }
     
     filter->coeffs = calloc ( order + 1, sizeof( double ) );
     if ( filter->coeffs == NULL ) {
-        free( filter ); // Tidy up.
-        filterfatalError( FILT_MEM_ERR, "Could not allocate coefficient memory." );
+        g_FILT_ERR = FILT_MEM_ERR;
+        return NULL;
+    }
+    if ( filtMemAllocated( filter->coeffs ) != FILT_NO_ERR ) {
+        g_FILT_ERR = FILT_FILE_ERR;
+        return NULL;
     }
     
     filter->numCoeffs = order + 1;
@@ -58,7 +73,8 @@ firFilter* createFilter( int order, double *circularBuffer ) {
     filter->delayLineIndex = 0;
     
     if ( initDelayLine( filter ) != FILT_NO_ERR ) {
-        filterfatalError( FILT_MEM_ERR, "Error initialising filter: NULL filter address." );
+        g_FILT_ERR = FILT_MEM_ERR;
+        return NULL;
     }
     
     return filter;
@@ -70,7 +86,7 @@ firErr destroyFilter( firFilter *filter ) {
         return FILT_ARG_NULL;
     }
     if ( filter->coeffs == NULL ) {
-        filterfatalError( FILT_MEM_ERR, "Filter coefficients NULL." );
+        return FILT_MEM_ERR;
     }
     
     free( filter->coeffs );
@@ -125,7 +141,7 @@ firErr processBuffer( firFilter *filter, double *buffer, int numSamples ) {
         return FILT_ARG_NULL;
     }
     if ( numSamples < 0 ) {
-        return FILT_BAD_ARG;
+        return FILT_OOB_ARG;
     }
     
     for ( int i; i < numSamples; ++i ) {
@@ -184,11 +200,40 @@ void applyBlackmanWindow( firFilter *filter ) {
 }
 
 
-void filterfatalError( firErr code, char *info ) {
-    fprintf( stderr, "FIR FILTER ERROR: %s\n", info );
-    exit( code );
+/* For dynammic memory allocation tracking. */
+
+firErr initFiltErrHandling( void ) {
+    g_filtTemp = tmpfile();
+    if ( g_filtTemp == NULL ) {
+        return FILT_FILE_ERR;
+    }
+    return FILT_NO_ERR;
 }
 
+
+firErr filtMemAllocated( void *ptr ) {
+    if ( fprintf( g_filtTemp, "%p ", ptr ) < 0 ) {
+        return FILT_FILE_ERR;
+    }
+//  printf( "Wrote pointer %p to temp\n", ptr ); // For debugging purposes
+    return FILT_NO_ERR;
+}
+
+
+void filtFreeMem( void ) {
+    rewind( g_filtTemp );
+    void *ptr;
+    
+    while ( fscanf( g_filtTemp, "%p", &ptr ) != EOF ) {
+//      printf( "Read pointer %p from temp\n", ptr ); // For debugging purposes
+        free( ptr );
+    }
+    
+    fclose( g_filtTemp );
+}
+
+
+/* Additional methods used for testing. */
 
 #ifdef FILTER_TESTS
 

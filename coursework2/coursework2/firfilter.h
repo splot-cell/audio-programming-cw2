@@ -40,18 +40,25 @@ typedef enum FILTER_TYPE_ENUM {
 
 
 typedef enum FILTER_ERROR_ENUM {
-    FILT_NO_ERR,
-    FILT_MEM_ERR,
-    FILT_ARG_NULL,
-    FILT_BAD_ARG
+    FILT_NO_ERR, // No error.
+    FILT_MEM_ERR, // Error allocating or accessing memory.
+    FILT_ARG_NULL, // Fuction has been passed NULL pointer.
+    FILT_OOB_ARG, // Function has been passed an argument out of parameter bounds.
+    FILT_FILE_ERR // Error relating to tempory file for memory handling.
 } firErr;
+
+
+/* GLOBALS */
+
+extern firErr g_FILT_ERR;
 
 
 /* FUNCTION PROTOTYPES */
 
 /*      createFilter()
  * Creates FIR filter struct to contain a filter of order <order>.
- * <circularBuffer> = pointer to an array of doubles of size order + 1. */
+ * <circularBuffer> = pointer to an array of doubles of size order + 1.
+ * Returns NULL and sets g_FILT_ERR to relevent error code if unsuccessful. */
 firFilter* createFilter( int order, double *circularBuffer );
 
 
@@ -73,6 +80,18 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
 /*      processBuffer()
  * */
 firErr processBuffer( firFilter *filter, double *buffer, int numSamples );
+
+
+/*      initiFiltErrHandling()
+ * To be run at program start. Initialises g_FILT_ERR to FILT_NO_ERR, and sets up dynamic memory
+ * tracking. */
+firErr initFiltErrHandling( void );
+
+
+/*      filtFreeMem()
+ * To be used when an error occurs. Will free all dynamically allocated memory related to fir
+ * filter variables. */
+void filtFreeMem( void );
 
 
 #endif // firfilter_h

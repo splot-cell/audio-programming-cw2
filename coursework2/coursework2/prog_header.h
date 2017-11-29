@@ -72,6 +72,12 @@ void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions 
 void openFiles( userInput *userData, audioFile **inputFile, audioFile **outputFile );
 
 
+void initFileTracking( void );
+
+
+void errorHandler( int code, char *info );
+
+
 /*      cleanupMemory()
  * Helper function for freeing dynamicly allocated memory at end of program. */
 void cleanupMemory( userInput *userOptions, audioFile *inputFile, audioFile *outputFile, firFilter *filter );

@@ -10,10 +10,13 @@
 
 int main( int argc, char * argv[] ) {
     
-    /* Initialise dynamic memory tracking. */
+    /* Initialise memory and file tracking. */
     initMemTracking();
-    
-    
+    if ( initFiltErrHandling() != FILT_NO_ERR ) {
+        programExit( BAD_FILE_OPEN, "Error initialising filter memory temporary file." );
+    }
+    initFileTracking();
+
     if ( argc == 1 ) {
         printHelp();
     }
@@ -36,8 +39,10 @@ int main( int argc, char * argv[] ) {
     
     /* Open files and create filter. */
     openFiles( userData, &inputFile, &outputFile );
-    filter = createFilter( g_filterOrder, filterDelayLine );
-    memAllocated( filter );
+    if ( ( filter = createFilter( g_filterOrder, filterDelayLine ) ) == NULL ) {
+        printf( "Filter error code: %d\n", g_FILT_ERR );
+        errorHandler( BAD_MEMORY, "Filter creation failed." );
+    }
     setCoefficients( filter, getSampleRate( inputFile ), userData->filterFrequncy, userData->windowing );
     
     /* Audio processing loop. */
@@ -46,12 +51,17 @@ int main( int argc, char * argv[] ) {
     do {
         count = readAudioDouble( inputFile, buffer, userData->bufferSize );
         
+        
+        /* Flush buffer logic goes here. */
+        
+        
         processBuffer( filter, buffer, count );
         
-        writeAudioDouble( outputFile, buffer, count );
+        if ( writeAudioDouble( outputFile, buffer, count ) < 0 ) {
+            errorHandler( BAD_FILE_WRITE, "Could not write buffer to output file." );
+        }
+        
     } while ( count != 0 );
-    
-    /* Flush buffer. */
     
     /* Free memory. */
     cleanupMemory( userData, inputFile, outputFile, filter );

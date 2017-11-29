@@ -72,35 +72,40 @@ void flushStdIn( void ) {
 
 /* For audio IO */
 
-audioFile* openInputFile( char *filename ) {
+
+audioFile* allocateAudioFileMem( void ) {
     audioFile *file = calloc( 1, sizeof( audioFile ) );
     if ( file == NULL ) {
-        programExit( BAD_MEMORY, "Could not allocate memory for input file." );
+        return NULL;
     }
-    
-    file->audioFile = sf_open( filename, SFM_READ, &file->infoFile );
-    if ( file->audioFile == NULL ) {
-        programExit( BAD_FILE_OPEN, "Could not open input file selected!" );
-    }
+    memAllocated( file );
     
     return file;
 }
 
 
-audioFile* openOutputFile( char *filename, audioFile settings, int filterOrder ) {
-    audioFile *file = calloc( 1, sizeof( audioFile ) );
-    if (file == NULL ) {
-        programExit( BAD_MEMORY, "Could not allocate memory for output file." );
+int openInputFile( audioFile *file, char *filename ) {
+    
+    file->audioFile = sf_open( filename, SFM_READ, &file->infoFile );
+    if ( file->audioFile == NULL ) {
+        return BAD_FILE_OPEN;
     }
-    file->infoFile = settings.infoFile; // Copy settings from input file
+    
+    return NO_ERR;
+}
+
+
+int openOutputFile( audioFile *file, char *filename, audioFile *settings, int filterOrder ) {
+    
+    file->infoFile = settings->infoFile; // Copy settings from input file
     file->infoFile.frames += filterOrder; // Output file must have additional frames
     
     file->audioFile = sf_open( filename, SFM_WRITE, &file->infoFile );
     if ( file->audioFile == NULL ) {
-        programExit( BAD_FILE_OPEN, "Could not open output file selected!" );
+        return BAD_FILE_OPEN;
     }
     
-    return file;
+    return NO_ERR;
 }
 
 
@@ -143,7 +148,7 @@ int writeAudioDouble( audioFile *file, double *buffer, int numSamples ) {
     }
     int written = (int) sf_write_double( file->audioFile, buffer, numSamples );
     if ( written != numSamples ) {
-        programExit( BAD_FILE_WRITE, "Could not write buffer to output file." );
+        return BAD_FILE_WRITE;
     }
     return written;
 }

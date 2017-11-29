@@ -8,7 +8,7 @@
 #ifndef errors_h
 #define errors_h
 
-#include <stdlib.h> // For exit().
+#include <stdlib.h> // For exit() and free().
 #include <stdio.h> // For fprintf().
 
 
@@ -20,13 +20,12 @@ enum ERR {
     BAD_COMMAND_LINE,
     OUT_OF_BOUNDS_VALUE,
     BAD_FILE_OPEN,
-    BAD_FILE_WRITE,
-    NULL_FUNC_ARG = -1 // Required for functions that would otherwise return positive int
+    BAD_FILE_WRITE = -1, // Required for functions that would otherwise return positive int
+    NULL_FUNC_ARG = -2
 };
 
 
 /* FUNCTION PROTOTYPES */
-
 
 void initMemTracking( void );
 
@@ -34,7 +33,7 @@ void initMemTracking( void );
 void memAllocated( void *ptr );
 
 
-/*      fatalError()
+/*      programExit()
  * Helper function for deallocating memory, printing error code, and exiting program. */
 void programExit( int code, char *info );
 
