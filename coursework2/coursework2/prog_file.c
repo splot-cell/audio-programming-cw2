@@ -22,11 +22,6 @@ const int g_minBufferSize = 64;
 static FILE *g_tempFiles;
 
 
-/* TYPE DEFINITIONS */
-
-
-
-
 /* PRIVATE FUNCTION PROTOTYPES */
 
 /*      optionalArgumentHandler()

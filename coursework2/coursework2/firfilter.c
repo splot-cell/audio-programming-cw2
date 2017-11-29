@@ -215,7 +215,7 @@ firErr filtMemAllocated( void *ptr ) {
     if ( fprintf( g_filtTemp, "%p ", ptr ) < 0 ) {
         return FILT_FILE_ERR;
     }
-//  printf( "Wrote pointer %p to temp\n", ptr ); // For debugging purposes
+//    printf( "Wrote pointer %p to temp\n", ptr ); // For debugging purposes
     return FILT_NO_ERR;
 }
 
@@ -225,7 +225,7 @@ void filtFreeMem( void ) {
     void *ptr;
     
     while ( fscanf( g_filtTemp, "%p", &ptr ) != EOF ) {
-//      printf( "Read pointer %p from temp\n", ptr ); // For debugging purposes
+//        printf( "Read pointer %p from temp\n", ptr ); // For debugging purposes
         free( ptr );
     }
     
