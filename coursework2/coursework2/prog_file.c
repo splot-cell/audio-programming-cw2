@@ -17,18 +17,12 @@ const int g_minFilterFreq = 20;
 const int g_maxFilterFreq = 20000;
 const int g_filterOrder = 126;
 const int g_maxBufferSize = 2048;
+const int g_minBufferSize = 64;
 
 
 /* TYPE DEFINITIONS */
 
-typedef struct userInput_struct {
-    char *inputFilename;
-    char *outputFilename;
-    int filterFrequncy;
-    filterType filterType;
-    firWindow windowing;
-    int bufferSize;
-} userInput;
+
 
 
 /* PRIVATE FUNCTION PROTOTYPES */
@@ -144,6 +138,15 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
                 break;
             case 'h':
                 userOptions->filterType = TYPE_HIGHPASS;
+                break;
+            case 'b':
+                if ( isOnlyPositiveInt( optarg ) == false ) {
+                    fatalError( BAD_COMMAND_LINE, "Buffer size must be a positive integer." );
+                }
+                userOptions->bufferSize = strToInt( optarg, g_minBufferSize, g_maxBufferSize, "buffer size" );
+                if ( ( userOptions->bufferSize % g_minBufferSize ) != 0 ) {
+                    fatalError( BAD_COMMAND_LINE, "Buffer size must be a power of 2." );
+                }
                 break;
             case '?':
                 if ( optopt == 'w' ) {

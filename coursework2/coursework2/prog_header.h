@@ -24,11 +24,20 @@ extern const int g_minFilterFreq;
 extern const int g_maxFilterFreq;
 extern const int g_filterOrder;
 extern const int g_maxBufferSize;
+extern const int g_minBufferSize;
 
 
 /* DATA TYPES */
 
-typedef struct userInput_struct userInput; // For storing all user input.
+/* For storing all user input. No need to be opaque. */
+typedef struct userInput_struct {
+    char *inputFilename;
+    char *outputFilename;
+    int filterFrequncy;
+    filterType filterType;
+    firWindow windowing;
+    int bufferSize;
+} userInput;
 
 
 /* FUNCTION PROTOTYPES */
@@ -39,7 +48,9 @@ void printHelp( void );
 
 
 /*      createUserDataStruct
- * Allocates memory required for struct to hold user data. Returns poiter to memory. */
+ * Allocates memory required for struct to hold user data. Returns poiter to memory.
+ * Allocating dynamically makes passing the data around easier despite the non-opaque
+ * nature of the struct. */
 userInput* createUserDataStruct( void );
 
 

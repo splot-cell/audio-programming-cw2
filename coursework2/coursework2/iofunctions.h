@@ -85,8 +85,8 @@ int readAudioDouble( audioFile *file, double *buffer, int sizeOfBuffer );
 
 /*      writeAudioDouble()
  * Writes <numSamples> samples from <buffer> into <file>.
- * Checks number of samples written.
- * Returns NO_ERR if successful. */
+ * Checks number of samples written is equal to <numSamples>.
+ * Returns number of samples writen. */
 int writeAudioDouble( audioFile *file, double *buffer, int numSamples );
 
 
