@@ -67,6 +67,6 @@ void addUITests( qtestsuite_t *testsuite ) {
     qunittest_t *isOnlyInt = add_qunittest( "Only integer sanitisation", testsuite );
     isOnlyPInt_isCorrect( isOnlyInt );
     
-    qunittest_t *isWav = add_qunittest( "Only .wav sanitisation", testsuite );
+    qunittest_t *isWav = add_qunittest( "Only '*.wav' sanitisation", testsuite );
     isWav_isCorrect( isWav );
 }
