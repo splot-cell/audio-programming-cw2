@@ -56,10 +56,13 @@ int main( int argc, char * argv[] ) {
             do {
                 buffer [ ( count + tailCount ) % userData->bufferSize ] = 0;
                 ++tailCount;
-            } while ( ( count + tailCount ) % userData->bufferSize != 0 ) // While it's not the end of the buffer.
+            } while ( ( count + tailCount ) % userData->bufferSize != 0 &&
+                     tailCount != g_filterOrder ); // While it's not the end of the buffer.
         }
         
-        processBuffer( filter, buffer, count + tailCount );
+        if ( processBuffer( filter, buffer, count + tailCount ) != FILT_NO_ERR ) {
+            errorHandler( BAD_BUFFER_PROCESS, "Error processing audio buffer." );
+        }
         
         if ( writeAudioDouble( outputFile, buffer, count + tailCount ) < 0 ) {
             errorHandler( BAD_FILE_WRITE, "Could not write buffer to output file." );

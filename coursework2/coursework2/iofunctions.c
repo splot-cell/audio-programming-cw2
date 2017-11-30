@@ -130,7 +130,7 @@ int getChannelCount( audioFile *file ) {
     if ( file == NULL ) {
         return NULL_FUNC_ARG;
     }
-    return file->infoFile.samplerate;
+    return file->infoFile.channels;
 }
 
 

@@ -20,6 +20,7 @@ enum ERR {
     BAD_COMMAND_LINE,
     OUT_OF_BOUNDS_VALUE,
     BAD_FILE_OPEN,
+    BAD_BUFFER_PROCESS,
     BAD_FILE_WRITE = -1, // Required for functions that would otherwise return positive int
     NULL_FUNC_ARG = -2
 };

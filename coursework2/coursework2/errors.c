@@ -47,7 +47,8 @@ void deallocateMem( void ) {
 void programExit( int code, char *info ) {
     deallocateMem();
     if ( code != NO_ERR ) {
-        fprintf( stderr, "ERROR: %s\n", info );
+        fprintf( stderr, "ERROR: code %d\n%s\n", code, info );
+        exit( EXIT_FAILURE ); // exit() does not like negative error codes, so code is printed then exit called
     }
-    exit( code );
+    exit( EXIT_SUCCESS );
 }

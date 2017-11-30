@@ -42,6 +42,9 @@ bool wavFilenameHandler( char **filename, char mode );
 int strToInt( char *str, int lowerLimit, int upperLimit, char *label );
 
 
+void checkAudioFileMono( audioFile *file );
+
+
 void fileOpened( audioFile *ptr );
 
 
@@ -188,9 +191,7 @@ void openFiles( userInput *userData, audioFile **inputFile, audioFile **outputFi
     }
     fileOpened( *inputFile );
     
-    if ( getChannelCount( *inputFile ) != 1 ) {
-        errorHandler( BAD_FILE_OPEN, "Input file must have one channel." );
-    }
+    checkAudioFileMono( *inputFile );
     
     if ( ( *outputFile = allocateAudioFileMem() ) == NULL ) {
         errorHandler( BAD_MEMORY, "Could not allocate memory for output file." );
@@ -200,6 +201,13 @@ void openFiles( userInput *userData, audioFile **inputFile, audioFile **outputFi
         errorHandler( BAD_FILE_OPEN, "Could not open output file selected!" );
     }
     fileOpened( *outputFile );
+}
+
+
+void checkAudioFileMono( audioFile *file ) {
+    if ( getChannelCount( file ) != 1 ) {
+        errorHandler( BAD_FILE_OPEN, "Input file must have one channel." );
+    }
 }
 
 
@@ -275,7 +283,7 @@ void errorHandler( int code, char *info ) {
         
 
 void cleanupMemory( userInput *userOptions, audioFile *inputFile, audioFile *outputFile, firFilter *filter ) {
-    destroyUserDataStruct( userOptions ); // No need to check if NULL as cleaning nothing is fine
+    destroyUserDataStruct( userOptions );
     closeAudioFile( inputFile );
     closeAudioFile( outputFile );
     destroyFilter( filter );
