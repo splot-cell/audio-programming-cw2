@@ -144,13 +144,13 @@ firErr processBuffer( firFilter *filter, double *buffer, int numSamples ) {
         return FILT_OOB_ARG;
     }
     
-    for ( int i; i < numSamples; ++i ) {
+    for ( int i = 0; i < numSamples; ++i ) {
         filter->delayLine[ filter->delayLineIndex ] = buffer[ i ];
-        for ( int j; j < filter->numCoeffs; ++j ){
+        for ( int j = 0; j < filter->numCoeffs; ++j ){
             buffer[ i ] = filter->coeffs[ j ] *
                 filter->delayLine[ ( filter->delayLineIndex + j ) % filter->numCoeffs ];
-            filter->delayLineIndex = ( filter->delayLineIndex + 1 ) % filter->numCoeffs;
         }
+        filter->delayLineIndex = ( filter->numCoeffs + filter->delayLineIndex - 1 ) % filter->numCoeffs;
     }
     return FILT_NO_ERR;
 }

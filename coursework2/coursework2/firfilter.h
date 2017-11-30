@@ -82,6 +82,9 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
 firErr processBuffer( firFilter *filter, double *buffer, int numSamples );
 
 
+firErr flushFilter( firFilter *filter, double *buffer, int numSamples );
+
+
 /*      initiFiltErrHandling()
  * To be run at program start. Initialises g_FILT_ERR to FILT_NO_ERR, and sets up dynamic memory
  * tracking. */

@@ -18,6 +18,7 @@ const int g_maxFilterFreq = 20000;
 const int g_filterOrder = 126;
 const int g_maxBufferSize = 2048;
 const int g_minBufferSize = 64;
+const int g_defaultBufferSize = 128;
 
 static FILE *g_tempFiles;
 
@@ -175,6 +176,7 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
     }
 }
 
+
 void openFiles( userInput *userData, audioFile **inputFile, audioFile **outputFile ) {
     
     if ( ( *inputFile = allocateAudioFileMem() ) == NULL ) {
@@ -186,6 +188,9 @@ void openFiles( userInput *userData, audioFile **inputFile, audioFile **outputFi
     }
     fileOpened( *inputFile );
     
+    if ( getChannelCount( *inputFile ) != 1 ) {
+        errorHandler( BAD_FILE_OPEN, "Input file must have one channel." );
+    }
     
     if ( ( *outputFile = allocateAudioFileMem() ) == NULL ) {
         errorHandler( BAD_MEMORY, "Could not allocate memory for output file." );

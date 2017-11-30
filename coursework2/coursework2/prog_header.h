@@ -25,6 +25,7 @@ extern const int g_maxFilterFreq;
 extern const int g_filterOrder;
 extern const int g_maxBufferSize;
 extern const int g_minBufferSize;
+extern const int g_defaultBufferSize;
 
 
 /* DATA TYPES */

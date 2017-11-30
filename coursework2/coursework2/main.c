@@ -23,8 +23,7 @@ int main( int argc, char * argv[] ) {
     
     /* Create user data struct. */
     userInput *userData = createUserDataStruct();
-    const int defaultBufferSize = 128;
-    userData->bufferSize = defaultBufferSize;
+    userData->bufferSize = g_defaultBufferSize;
     
     /* Populate userData from command line arguments and options. */
     commandLineArgumentHandler( argc, argv, userData );
@@ -47,21 +46,26 @@ int main( int argc, char * argv[] ) {
     
     /* Audio processing loop. */
     int count = 0;
+    int tailCount = 0; // Number of samples written from the "decay tail" of the filter
     
     do {
         count = readAudioDouble( inputFile, buffer, userData->bufferSize );
         
+        /* Flush buffer logic. */
+        if ( count != userData->bufferSize ) {
+            do {
+                buffer [ ( count + tailCount ) % userData->bufferSize ] = 0;
+                ++tailCount;
+            } while ( ( count + tailCount ) % userData->bufferSize != 0 ) // While it's not the end of the buffer.
+        }
         
-        /* Flush buffer logic goes here. */
+        processBuffer( filter, buffer, count + tailCount );
         
-        
-        processBuffer( filter, buffer, count );
-        
-        if ( writeAudioDouble( outputFile, buffer, count ) < 0 ) {
+        if ( writeAudioDouble( outputFile, buffer, count + tailCount ) < 0 ) {
             errorHandler( BAD_FILE_WRITE, "Could not write buffer to output file." );
         }
         
-    } while ( count != 0 );
+    } while ( g_filterOrder != tailCount );
     
     /* Free memory. */
     cleanupMemory( userData, inputFile, outputFile, filter );
