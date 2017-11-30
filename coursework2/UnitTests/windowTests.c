@@ -24,7 +24,9 @@ void bartTests( qunittest_t *test ) {
     
     for ( int i = 0; i < order + 1; ++i ) {
         char str[ 100 ];
-        sprintf( str, "Bart window %d expected:\t%f\tactual:\t%f", i, result[ i ], getCoefficients( filter )[ i ] );
+        sprintf( str, "Bart window %d expected:\t%f\tactual:\t%f", i, result[ i ],
+                getCoefficients( filter )[ i ] );
+        
         qtest_doubles_equal( result[ i ], getCoefficients( filter )[ i ], 0.00002, str, test );
     }
     
@@ -47,7 +49,9 @@ void hannTests( qunittest_t *test ) {
     
     for ( int i = 0; i < order + 1; ++i ) {
         char str[ 100 ];
-        sprintf( str, "Hann window %d expected:\t%f\tactual:\t%f", i, result[ i ], getCoefficients( filter )[ i ] );
+        sprintf( str, "Hann window %d expected:\t%f\tactual:\t%f", i, result[ i ],
+                getCoefficients( filter )[ i ] );
+        
         qtest_doubles_equal( result[ i ], getCoefficients( filter )[ i ], 0.00002, str, test );
     }
     
@@ -70,7 +74,9 @@ void hammTests( qunittest_t *test ) {
     
     for ( int i = 0; i < order + 1; ++i ) {
         char str[ 100 ];
-        sprintf( str, "Hamm window %d expected:\t%f\tactual:\t%f", i, result[ i ], getCoefficients( filter )[ i ] );
+        sprintf( str, "Hamm window %d expected:\t%f\tactual:\t%f", i, result[ i ],
+                getCoefficients( filter )[ i ] );
+        
         qtest_doubles_equal( result[ i ], getCoefficients( filter )[ i ], 0.00002, str, test );
     }
     
@@ -92,19 +98,13 @@ void blkTests( qunittest_t *test ) {
         0.509787137637478, 0.34, 0.200770143262531, 0.101386014303768,
         0.0402128623625221, 0.009193101402419, -0.0 };
     
-    
-    /* First and last coefficients are so so tiny that up to about 1% error occurs. They are therefore separate
-     * from the following test loop. */
     char str[ 100 ];
-    sprintf( str, "Blackman window %d expected:\t%f\tactual:\t%f", 0, result[ 0 ], getCoefficients( filter )[ 0 ] );
-    qtest_doubles_equal( result[ 0 ], getCoefficients( filter )[ 0 ], 1, str, test );
     
-    for ( int i = 1; i < order; ++i ) {
-        sprintf( str, "Blackman window %d expected:\t%f\tactual:\t%f", i, result[ i ], getCoefficients( filter )[ i ] );
-        qtest_doubles_equal( result[ i ], getCoefficients( filter )[ i ], 0.000001, str, test );
+    for ( int i = 0; i < order + 1; ++i ) {
+        sprintf( str, "Blackman window %d expected:\t%f\tactual:\t%f", i, result[ i ],
+                getCoefficients( filter )[ i ] );
+        
+        /* Test absolute instead of percentage difference as very small */
+        qtest_doubles_within_range( result[ i ], getCoefficients( filter )[ i ], 0.0000000001, str, test );
     }
-    
-    sprintf( str, "Blackman window %d expected:\t%f\tactual:\t%f", order, result[ order ], getCoefficients( filter )[ order ] );
-    qtest_doubles_equal( result[ order ], getCoefficients( filter )[ order ], 1, str, test );
-    
 }
