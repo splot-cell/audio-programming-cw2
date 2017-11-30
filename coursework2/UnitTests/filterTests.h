@@ -19,6 +19,8 @@
 extern double g_buf[ 130 ]; // Single buffer used to create each filter under test. Saves memory.
 
 
+/* FUNCTION PROTOTYPES */
+
 void resetg_buf( void );
 
 

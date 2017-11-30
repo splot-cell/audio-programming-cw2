@@ -8,6 +8,7 @@
 #ifndef firfilterAdditionalTest_h
 #define firfilterAdditionalTest_h
 
+
 /* ADDITIONAL FUNCTION PROTOTYPES FOR TESTING */
 
 typedef struct firfilter_struct firFilter;
@@ -25,5 +26,6 @@ void applyHanningWindow( firFilter *filter );
 void applyHammingWindow( firFilter *filter );
 
 void applyBlackmanWindow( firFilter *filter );
+
 
 #endif // firfilterAdditionalTest_h

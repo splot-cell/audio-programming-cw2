@@ -9,8 +9,12 @@
 #include "filterTests.h"
 
 
+/* GLOBALS */
+
 double g_buf[ 130 ];
 
+
+/* FUNCTION DEFINITIONS */
 
 void resetg_buf( void ) {
     for ( int i = 0; i < 130; ++i ){

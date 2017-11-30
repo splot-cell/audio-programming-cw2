@@ -8,6 +8,9 @@
 
 #include "filterTests.h"
 
+
+/* FUNCTION DEFINITIONS */
+
 void bartTests( qunittest_t *test ) {
     const int order = 20;
     firFilter *filter = createFilter( 20, g_buf );
