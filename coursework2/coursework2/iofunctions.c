@@ -93,6 +93,8 @@ int openInputFile( audioFile *file, char *filename ) {
         return BAD_FILE_OPEN;
     }
     
+    sf_command ( file->audioFile, SFC_SET_CLIPPING, NULL, SF_TRUE );
+    
     return NO_ERR;
 }
 
@@ -105,6 +107,8 @@ int openOutputFile( audioFile *file, char *filename, audioFile *settings ) {
     if ( file->audioFile == NULL ) {
         return BAD_FILE_OPEN;
     }
+    
+    sf_command ( file->audioFile, SFC_SET_CLIPPING, NULL, SF_TRUE );
     
     return NO_ERR;
 }

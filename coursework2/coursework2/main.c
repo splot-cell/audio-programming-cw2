@@ -21,8 +21,6 @@ int main( int argc, char * argv[] ) {
         printHelp();
     }
     
-    //sf_command(<#SNDFILE *sndfile#>, <#int command#>, <#void *data#>, <#int datasize#>);
-    
     /* Create user data struct. */
     userInput *userData = createUserDataStruct();
     userData->bufferSize = g_defaultBufferSize;

@@ -101,7 +101,7 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
         return FILT_ARG_NULL;
     }
     
-    double ft = cutoff / samplerate;
+    double ft = cutoff / (double) samplerate;
     float M = filter->numCoeffs - 1;
     
     for ( int i = 0; i < filter->numCoeffs; ++i ) {
@@ -150,7 +150,7 @@ firErr processBuffer( firFilter *filter, double *buffer, int numSamples ) {
             buffer[ i ] = filter->coeffs[ j ] *
                 filter->delayLine[ ( filter->delayLineIndex + j ) % filter->numCoeffs ];
         }
-        filter->delayLineIndex = ( filter->numCoeffs + filter->delayLineIndex - 1 ) % filter->numCoeffs;
+        filter->delayLineIndex = ( filter->delayLineIndex - 1 + filter->numCoeffs ) % filter->numCoeffs;
     }
     return FILT_NO_ERR;
 }
