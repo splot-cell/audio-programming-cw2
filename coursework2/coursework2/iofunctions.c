@@ -86,6 +86,8 @@ audioFile* allocateAudioFileMem( void ) {
 
 int openInputFile( audioFile *file, char *filename ) {
     
+    file->infoFile.format = 0;
+    
     file->audioFile = sf_open( filename, SFM_READ, &file->infoFile );
     if ( file->audioFile == NULL ) {
         return BAD_FILE_OPEN;
@@ -98,7 +100,6 @@ int openInputFile( audioFile *file, char *filename ) {
 int openOutputFile( audioFile *file, char *filename, audioFile *settings, int filterOrder ) {
     
     file->infoFile = settings->infoFile; // Copy settings from input file
-    file->infoFile.frames += filterOrder; // Output file must have additional frames
     
     file->audioFile = sf_open( filename, SFM_WRITE, &file->infoFile );
     if ( file->audioFile == NULL ) {
