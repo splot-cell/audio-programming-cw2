@@ -69,12 +69,12 @@ int destroyUserDataStruct( userInput *data ) {
     if ( data == NULL ) {
         return NULL_FUNC_ARG;
     }
-    if ( data->inputFilename != NULL ) {
-        free( data->inputFilename );
-    }
-    if ( data->outputFilename != NULL ) {
-        free( data->outputFilename );
-    }
+//    if ( data->inputFilename != NULL ) {
+//        free( data->inputFilename );
+//    }
+//    if ( data->outputFilename != NULL ) {
+//        free( data->outputFilename );
+//    }
     free( data );
     return NO_ERR;
 }
@@ -94,17 +94,28 @@ void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions 
         errorHandler( BAD_COMMAND_LINE, "Could not continue, incorrect number of arguments detected." );
     }
     
-    /* Allocate memory for filnames, adding 6 additional characters for '.wav\0'. */
-    allocFilenameMem( &userOptions->inputFilename, strlen( argv[ argc - 3 ] ) + 7 );
-    allocFilenameMem( &userOptions->outputFilename, strlen( argv[ argc - 3 ] ) + 7 );
+//    /* Allocate memory for filnames, adding 6 additional characters for '.wav\0'. */
+//    allocFilenameMem( &userOptions->inputFilename, strlen( argv[ argc - 3 ] ) + 7 );
+//    allocFilenameMem( &userOptions->outputFilename, strlen( argv[ argc - 3 ] ) + 7 );
+//    
+//    strcpy( userOptions->inputFilename, argv[ argc - 3] );
+//    strcpy( userOptions->outputFilename, argv[ argc - 2] );
+
+    userOptions->inputFilename = argv[ argc - 3 ];
+    userOptions->outputFilename = argv[ argc - 2 ];
     
-    strcpy( userOptions->inputFilename, argv[ argc - 3] );
-    strcpy( userOptions->outputFilename, argv[ argc - 2] );
-    
-    if ( wavFilenameHandler( &userOptions->inputFilename, 'i' ) == false ||
-            wavFilenameHandler( &userOptions->outputFilename, 'o' ) == false ) {
-        errorHandler( NO_ERR, "" );
+    if ( isWavFilename(userOptions->inputFilename ) == false ) {
+        errorHandler( BAD_FILE_OPEN, "Input filnemae was not in the format '*.wav'." );
     }
+    
+    if ( isWavFilename(userOptions->outputFilename ) == false ) {
+        errorHandler( BAD_FILE_OPEN, "Output filnemae was not in the format '*.wav'." );
+    }
+    
+//    if ( wavFilenameHandler( &userOptions->inputFilename, 'i' ) == false ||
+//            wavFilenameHandler( &userOptions->outputFilename, 'o' ) == false ) {
+//        errorHandler( NO_ERR, "" );
+//    }
     
     /* Check characters and range of requested frequency */
     if ( isOnlyPositiveInt( argv[ argc - 1 ] ) == false ) {
