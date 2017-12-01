@@ -95,8 +95,8 @@ void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions 
     }
     
     /* Allocate memory for filnames, adding 6 additional characters for '.wav\0'. */
-    allocFilenameMem( &userOptions->inputFilename, strlen( argv[ argc - 3 ] ) + 6 );
-    allocFilenameMem( &userOptions->outputFilename, strlen( argv[ argc - 3 ] ) + 6 );
+    allocFilenameMem( &userOptions->inputFilename, strlen( argv[ argc - 3 ] ) + 7 );
+    allocFilenameMem( &userOptions->outputFilename, strlen( argv[ argc - 3 ] ) + 7 );
     
     strcpy( userOptions->inputFilename, argv[ argc - 3] );
     strcpy( userOptions->outputFilename, argv[ argc - 2] );
@@ -197,7 +197,7 @@ void openFiles( userInput *userData, audioFile **inputFile, audioFile **outputFi
         errorHandler( BAD_MEMORY, "Could not allocate memory for output file." );
     }
     
-    if ( openOutputFile( *outputFile, userData->inputFilename, *inputFile, g_filterOrder ) != NO_ERR ) {
+    if ( openOutputFile( *outputFile, userData->outputFilename, *inputFile ) != NO_ERR ) {
         errorHandler( BAD_FILE_OPEN, "Could not open output file selected!" );
     }
     fileOpened( *outputFile );

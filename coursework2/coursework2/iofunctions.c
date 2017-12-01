@@ -97,7 +97,7 @@ int openInputFile( audioFile *file, char *filename ) {
 }
 
 
-int openOutputFile( audioFile *file, char *filename, audioFile *settings, int filterOrder ) {
+int openOutputFile( audioFile *file, char *filename, audioFile *settings ) {
     
     file->infoFile = settings->infoFile; // Copy settings from input file
     

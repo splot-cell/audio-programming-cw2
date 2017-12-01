@@ -57,9 +57,8 @@ int openInputFile( audioFile *file, char *filename );
 /*      openOutputFile()
  * Opens audio file called <filename> in write mode.
  * <settings> = input file, so that the settigs may be reused.
- * <filterOrder> = the order of the filter to be applied, as output file must contain additional samples.
  * Returns pointer to the file if successful. */
-int openOutputFile( audioFile *file, char *filename, audioFile *settings, int filterOrder );
+int openOutputFile( audioFile *file, char *filename, audioFile *settings );
 
 
 /*      closeAudioFile()
