@@ -5,7 +5,7 @@
 //  Created by Olly Seber on 18/11/2017.
 //
 
-#include "prog_header.h"
+#include "prog_header.h" // program header file
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -35,7 +35,7 @@ int main( int argc, char * argv[] ) {
     /* Open files. */
     openFiles( userData, &inputFile, &outputFile );
     
-    /* Check selected filter frequency. */
+    /* Check selected filter frequency is within range. */
     if ( userData->filterFrequncy >= 0.5 * getSampleRate( inputFile ) ) {
         errorHandler( OUT_OF_BOUNDS_VALUE, "Please select a cut-off frequency less than half the sample rate of the input file." );
     }

@@ -3,8 +3,8 @@
 //  coursework2
 //
 //  Created by Olly Seber on 23/11/2017.
-//  Copyright © 2017 Olly Seber. All rights reserved.
 //
+// Contains all program-specific functions.
 
 #ifndef prog_header_h
 #define prog_header_h
@@ -14,6 +14,7 @@
 #include "errors.h" // Error codes are here.
 
 /* GLOBALS */
+
 extern const int g_minFilterFreq;
 extern const int g_maxFilterFreq; // Max filter frequency is also limited by Nyquist.
 extern const int g_filterOrder;
@@ -70,6 +71,9 @@ void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions 
 void openFiles( userInput *userData, audioFile **inputFile, audioFile **outputFile );
 
 
+/*      errorHandler()
+ * Handles a controlled exit of the program by closing open files and freeing filter memory.
+ * Then calls programExit() found in error.h using <code> and <info>. */
 void errorHandler( int code, char *info );
 
 

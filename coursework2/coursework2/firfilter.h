@@ -10,7 +10,7 @@
 
 #ifdef FILTER_TESTS
 
-#include "firfilterAdditionalTest.h"
+#include "firfilterAdditionalTest.h" // Contains some additional functions used for testing
 
 #else
 
@@ -80,12 +80,6 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
  * Returns FILT_ARG_NULL if <filter> or <buffer> is NULL.
  * Returns FILT_OOB_ARG if numSamples < 0. */
 firErr processBuffer( firFilter *filter, double *buffer, int numSamples );
-
-
-/*      initiFiltErrHandling()
- * To be run at program start. Initialises g_FILT_ERR to FILT_NO_ERR, and sets up dynamic memory
- * tracking. */
-firErr initFiltErrHandling( void );
 
 
 /*      filtFreeMem()

@@ -4,6 +4,7 @@
 //
 //  Created by Olly Seber on 19/11/2017.
 //
+// Contains re-usable i/o functions.
 
 #ifndef iofunctions_h
 #define iofunctions_h
@@ -51,7 +52,8 @@ bool getYesNo( void );
 /*      printWithBorder()
  * Prints array of strings <message> as lines of text with a border of asterisks.
  * <rows> = total number of strings in array, i.e. number of lines of text to print.
- * <borderWidth> defines the size of the border. */
+ * <borderWidth> defines the size of the border.
+ * First character of each row now specifies the row's justification. 'c' = centre, 'l' = left. */
 void printWithBorder( char *message[], int rows, int borderWidth );
 
 

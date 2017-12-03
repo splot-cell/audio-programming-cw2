@@ -22,3 +22,5 @@ DerivedData
 *.xcodeproj
 libsndfile.a
 sndfile.h
+*.zip
+

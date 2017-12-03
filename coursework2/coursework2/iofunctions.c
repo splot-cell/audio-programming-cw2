@@ -4,6 +4,7 @@
 //
 //  Created by Olly Seber on 19/11/2017.
 //
+// Contains re-usable i/o functions.
 
 #include "iofunctions.h"
 
@@ -112,7 +113,7 @@ void printWithBorder( char *message[], int rows, int borderWidth ) {
             
             else { // We must now be in the rows and character 'columns' with potential text.
                 
-                /* Set up whitespace for centre justification. */
+                /* Set up whitespace for justification. */
                 int centreOffset = 0;
                 
                 /* If the first character of the row is 'c' set offset to half the available space */

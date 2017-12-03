@@ -3,8 +3,8 @@
 //  coursework2
 //
 //  Created by Olly Seber on 23/11/2017.
-//  Copyright © 2017 Olly Seber. All rights reserved.
 //
+// Contains all program-specific functions.
 
 #include "prog_header.h"
 
@@ -48,6 +48,8 @@ static node *g_head = NULL; // For open audioFile tracking.
 void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions );
 
 
+/*      allocFilenameMem()
+ * Helper function to allocated <length> chars of memory to *<filename>. */
 void allocFilenameMem( char **filename, unsigned long length );
 
 
@@ -63,14 +65,26 @@ bool wavFilenameHandler( char **filename, char mode );
 void checkAudioFileMono( audioFile *file );
 
 
+/* For open file tracking. */
+
+/*      filePush()
+ * Adds file at <ptr> to linked list. */
+int filePush( audioFile *ptr );
+
+
+/*      filePop()
+ * Removes file from linked list and returns its location. */
+audioFile* filePop( void );
+
+
 /*      fileOpened()
  * For tracking files opened by the program.
- * Adds <ptr> to g_tempFiles. */
+ * Adds <ptr> list of files. */
 void fileOpened( audioFile *ptr );
 
 
 /*      closeOpenFiles()
- * Iterates through files pointed to in g_tempFiles and closes them. */
+ * Iterates through files pointed to in list and closes them. */
 void closeOpenFiles( void );
 
 
@@ -274,77 +288,8 @@ void allocFilenameMem( char **filename, unsigned long length ) {
 }
 
 
-/* OPEN FILE TRACKING - LINKED LIST FUNCTIONS */
-
-int filePush( audioFile *ptr ) {
-    node *new;
-    new = malloc( sizeof( node ) );
-    if ( new == NULL ) {
-        return 1;
-    }
-    new->data = ptr;
-    new->next = g_head;
-    
-    g_head = new;
-    
-    return 0;
-}
-
-
-audioFile* filePop( void ) {
-    audioFile *retVal = NULL;
-    node *next = NULL;
-    
-    if ( g_head == NULL ) {
-        return NULL;
-    }
-    
-    next = g_head->next;
-    retVal = g_head->data;
-    free( g_head );
-    g_head = next;
-    
-    return retVal;
-}
-
-
-void fileOpened( audioFile *ptr ) {
-    if ( filePush( ptr ) != 0 ) {
-        programExit( BAD_MEMORY, "Could not allocate memory for open file tracking!" );
-    }
-    
-//    printf( "Wrote pointer %p to file list\n", ptr ); // For debugging purposes
-}
-
-
-void closeOpenFiles( void ) {
-    void *temp;
-    while ( ( temp = filePop() ) != NULL ) {
-        closeAudioFile( temp );
-//        printf( "Freed pointer %p from list\n", temp ); // Debugging
-    }
-}
-
-
-void errorHandler( int code, char *info ) {
-    freeFiltMemory(); // Prevent memory leaks from filter.
-    closeOpenFiles(); // Prevent hanging files.
-    programExit( code, info ); // Handles memory leaks from program and exits.
-}
-        
-
-void cleanupMemory( userInput *userOptions, audioFile *inputFile, audioFile *outputFile, firFilter *filter ) {
-    destroyUserDataStruct( userOptions );
-    closeAudioFile( inputFile );
-    freeAudioFileMem( inputFile );
-    closeAudioFile( outputFile );
-    freeAudioFileMem( outputFile );
-    destroyFilter( filter );
-}
-
-
 void printHelp( void ) {
-    
+    /* First character of each line specifies justification. 'c' = centre, 'l' = left. */
     char *helpTitle[] = {
         "cOLLY'S WONDEROUS COURSEWORK SUBMISSION 2:",
         "cTHE FILTERING",
@@ -418,4 +363,73 @@ void printHelp( void ) {
     printWithBorder( helpText, ( sizeof( helpText ) / sizeof( helpText[ 0 ] ) ), 1 );
     
     errorHandler( NO_ERR, "" );
+}
+
+
+/* OPEN FILE TRACKING - LINKED LIST FUNCTIONS */
+
+int filePush( audioFile *ptr ) {
+    node *new;
+    new = malloc( sizeof( node ) );
+    if ( new == NULL ) {
+        return 1;
+    }
+    new->data = ptr;
+    new->next = g_head;
+    
+    g_head = new;
+    
+    return 0;
+}
+
+
+audioFile* filePop( void ) {
+    audioFile *retVal = NULL;
+    node *next = NULL;
+    
+    if ( g_head == NULL ) {
+        return NULL;
+    }
+    
+    next = g_head->next;
+    retVal = g_head->data;
+    free( g_head );
+    g_head = next;
+    
+    return retVal;
+}
+
+
+void fileOpened( audioFile *ptr ) {
+    if ( filePush( ptr ) != 0 ) {
+        programExit( BAD_MEMORY, "Could not allocate memory for open file tracking!" );
+    }
+    
+//    printf( "Wrote pointer %p to file list\n", ptr ); // For debugging purposes
+}
+
+
+void closeOpenFiles( void ) {
+    void *temp;
+    while ( ( temp = filePop() ) != NULL ) {
+        closeAudioFile( temp );
+//        printf( "Freed pointer %p from list\n", temp ); // Debugging
+    }
+}
+
+
+void errorHandler( int code, char *info ) {
+    freeFiltMemory(); // Prevent memory leaks from filter.
+    closeOpenFiles(); // Prevent hanging files.
+    programExit( code, info ); // Handles memory leaks from program and exits.
+}
+        
+
+void cleanupMemory( userInput *userOptions, audioFile *inputFile, audioFile *outputFile, firFilter *filter ) {
+    destroyUserDataStruct( userOptions );
+    closeAudioFile( inputFile );
+    freeAudioFileMem( inputFile );
+    closeAudioFile( outputFile );
+    freeAudioFileMem( outputFile );
+    destroyFilter( filter );
 }

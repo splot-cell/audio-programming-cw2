@@ -4,6 +4,7 @@
 //
 //  Created by Olly Seber on 25/11/2017.
 //
+// Deals with all the errors.
 
 #ifndef errors_h
 #define errors_h

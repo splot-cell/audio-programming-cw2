@@ -59,8 +59,19 @@ void applyHammingWindow( firFilter *filter );
 void applyBlackmanWindow( firFilter *filter );
 
 
+/* For dynamic memory tracking. */
+
+/*      filtPush()
+ * Adds <ptr> to linked list. */
+int filtPush( void *ptr );
+
+/*      filtPop()
+ * Removes item from linked list and returns the data. */
+void* filtPop( void );
+
+
 /*      filtMemAllocated()
- * For dynamic memory tracking. Adds <ptr> to g_filtTemp file. */
+ * For dynamic memory tracking. Adds <ptr> to list. */
 firErr filtMemAllocated( void *ptr );
 
 
