@@ -51,14 +51,14 @@ int main( int argc, char * argv[] ) {
     do {
         count = readAudioDouble( inputFile, buffer, userData->bufferSize );
         
-        /* Flush buffer logic. */
-        if ( count != userData->bufferSize ) {
-            do {
-                buffer [ ( count + tailCount ) % userData->bufferSize ] = 0;
-                ++tailCount;
-            } while ( ( count + tailCount ) % userData->bufferSize != 0 &&
-                     tailCount != g_filterOrder ); // While it's not the end of the buffer.
-        }
+//        /* Flush buffer logic. */
+//        if ( count != userData->bufferSize ) {
+//            do {
+//                buffer [ ( count + tailCount ) % userData->bufferSize ] = 0;
+//                ++tailCount;
+//            } while ( ( count + tailCount ) % userData->bufferSize != 0 &&
+//                     tailCount != g_filterOrder ); // While it's not the end of the buffer.
+//        }
         
         if ( processBuffer( filter, buffer, count + tailCount ) != FILT_NO_ERR ) {
             errorHandler( BAD_BUFFER_PROCESS, "Error processing audio buffer." );
@@ -68,7 +68,7 @@ int main( int argc, char * argv[] ) {
             errorHandler( BAD_FILE_WRITE, "Could not write buffer to output file." );
         }
         
-    } while ( g_filterOrder != tailCount );
+    } while ( g_filterOrder != tailCount && count != 0 ); // REMOVE SPARE COUNT EXPR
     
     /* Free memory. */
     cleanupMemory( userData, inputFile, outputFile, filter );

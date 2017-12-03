@@ -157,6 +157,34 @@ void setAllCoefficientsToOne( firFilter *filter, int order ) {
 }
 
 
+void processingTests( qunittest_t *test ) {
+    const int order = 9;
+    firFilter *filter = createFilter( order, g_buf );
+    const int bufSize = 20;
+    double inBuffer[ bufSize ] = { 1, 0 };
+    double coeffs[] = { 12, 13, 10, 20, 5.4, 32, 0.04, 10, 1, 0.4, 9 };
+    double **data = getData( filter );
+    
+    for ( int i = 0; i < 6; ++i ) {
+        *( *data + i ) = coeffs[ i ];
+    }
+    
+    for ( int i = 0; i < bufSize; ++i ) {
+        printf( "%f\n", inBuffer[ i ] );
+    }
+    
+    int x = processBuffer( filter, inBuffer, bufSize );
+    
+    qtest_assert_true( x == bufSize, "Process buffer correct count", test );
+    
+    for ( int i = 0; i < order + 1; ++i ) {
+        qtest_assert_true( inBuffer[ i ] == coeffs[ i ], "Diract samples correct", test );
+    }
+    
+    destroyFilter( filter );
+}
+
+
 void addFilterTests( qtestsuite_t *testsuite ) {
     srand( ( unsigned int ) time( NULL ) );
     resetg_buf();
@@ -178,4 +206,7 @@ void addFilterTests( qtestsuite_t *testsuite ) {
     hannTests( windowingTests );
     hammTests( windowingTests );
     blkTests( windowingTests );
+    
+    qunittest_t *processing = add_qunittest( "Processing buffer", testsuite );
+    processingTests( processing );
 }

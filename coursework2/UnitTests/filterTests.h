@@ -57,6 +57,9 @@ void hammTests( qunittest_t *test );
 void blkTests( qunittest_t *test );
 
 
+void processingTests( qunittest_t *test );
+
+
 void addFilterTests( qtestsuite_t *testsuite );
 
 
