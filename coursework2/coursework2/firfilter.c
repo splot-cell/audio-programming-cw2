@@ -25,9 +25,9 @@ static FILE *g_filtTemp; // For tracking memory usage
 /* TYPE DEFINITIONS */
 
 typedef struct firfilter_struct {
-    double *coeffs;
+    double *coeffs; // Array dynamically allocated when creating filter.
     int numCoeffs;
-    double *delayLine;
+    double *delayLine; // Array must be (statically) created by program and passed to filter.
     int delayLineIndex;
     filterType type;
 } firFilter;
@@ -69,7 +69,7 @@ firFilter* createFilter( int order, double *circularBuffer, filterType type ) {
         g_FILT_ERR = FILT_MEM_ERR;
         return NULL;
     }
-    if ( filtMemAllocated( filter ) != FILT_NO_ERR ) { // Check file write works
+    if ( filtMemAllocated( filter ) != FILT_NO_ERR ) { // Error check file write
         g_FILT_ERR = FILT_FILE_ERR;
         return NULL;
     }
@@ -103,7 +103,7 @@ firErr destroyFilter( firFilter *filter ) {
         return FILT_ARG_NULL;
     }
     if ( filter->coeffs == NULL ) {
-        return FILT_MEM_ERR;
+        return FILT_MEM_ERR; // Shouldn't happen
     }
     
     free( filter->coeffs );
@@ -123,13 +123,15 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
         return FILT_TYPE_ERR;
     }
     
+    /* Prepare some variables for the maths. */
     double ft = cutoff / (double) samplerate;
-    if ( ft >= 0.5 ) { // Cut-off should be less than half the sample frequency
+    if ( ft >= 0.5 ) { // Cut-off should be less than half the sample frequency.
         return FILT_OOB_ARG;
     }
     
-    float M_2 = ( filter->numCoeffs - 1 ) / 2.0; // Filter order divided by 2
+    float M_2 = ( filter->numCoeffs - 1 ) / 2.0; // Filter order divided by 2.
     
+    /* Set coefficients. */
     for ( int i = 0; i < filter->numCoeffs / 2.0; ++i ) {
         if ( i == M_2 ) {
             filter->coeffs[ i ] = 2 * ft;
@@ -144,11 +146,12 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
                 filter->coeffs[ i ] = -filter->coeffs[ i ];
             }
             
-            /* Coefficients are symetrical so copy to second half */
+            /* Coefficients are symetrical so only calculate once then copy to second half. */
             filter->coeffs[ filter->numCoeffs - i - 1 ] = filter->coeffs[ i ];
         }
     }
     
+    /* Set windowing. */
     switch ( window ) {
         case WINDOW_RECTANGULAR:
             break;
@@ -176,13 +179,16 @@ firErr processBuffer( firFilter *filter, double *buffer, int numSamples ) {
     if ( filter == NULL || buffer == NULL ) {
         return FILT_ARG_NULL;
     }
-    if ( numSamples < 0 ) {
+    if ( numSamples < 0 ) { // Avoid infinite for loop.
         return FILT_OOB_ARG;
     }
     
+    /* Iterate through the samples. */
     for ( int i = 0; i < numSamples; ++i ) {
         filter->delayLine[ filter->delayLineIndex ] = buffer[ i ];
         buffer[ i ] = 0;
+        
+        /* For each sample, iterate through the coefficients. */
         for ( int j = 0; j < filter->numCoeffs; ++j ){
             buffer[ i ] += filter->coeffs[ j ] *
                 filter->delayLine[ ( filter->delayLineIndex + filter->numCoeffs - j ) % filter->numCoeffs ];
@@ -232,7 +238,8 @@ void applyHammingWindow( firFilter *filter ) {
 void applyBlackmanWindow( firFilter *filter ) {
     float M = filter->numCoeffs - 1;
     for ( int i = 0; i < filter->numCoeffs; ++i ) {
-        filter->coeffs[ i ] *= 0.42 - ( 0.5 * cos( 2.0 * g_pi * i / M ) ) + ( 0.08 * cos( 4.0 * g_pi * i / M ) );
+        filter->coeffs[ i ] *= 0.42 - ( 0.5 * cos( 2.0 * g_pi * i / M ) ) +
+            ( 0.08 * cos( 4.0 * g_pi * i / M ) );
     }
 }
 

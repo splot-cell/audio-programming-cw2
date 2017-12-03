@@ -23,6 +23,8 @@ typedef struct audioFile_struct {
 
 /* PRIVATE FUNCTION PROTOTYPES */
 
+/*      flushStdIn()
+ * Used to remove any unwanted characters from stdin buffer after getting a char. */
 void flushStdIn( void );
 
 
@@ -48,13 +50,23 @@ bool isOnlyPositiveInt( const char *string ) {
 bool isWavFilename( const char *string ) {
     unsigned long length = strlen( string );
     if ( length < 5 ) {
-        return false;
+        return false; // Do not accept just ".wav"
     }
     if ( string[ length - 4 ] == '.' && string[ length - 3 ] == 'w' &&
         string[ length - 2 ] == 'a' && string[ length - 1 ] == 'v' ) {
         return true;
     }
     return false;
+}
+
+
+int strToInt( char *str, int *output, int lowerLimit, int upperLimit ) {
+    long int x = strtol( str, NULL, 10 ); // More robust conversion than atoi.
+    if ( x > upperLimit || x < lowerLimit ) {
+        return 1;
+    }
+    *output = (int) x;
+    return 0;
 }
 
 
@@ -71,7 +83,7 @@ bool getYesNo( void ) {
 
 void flushStdIn( void ) {
     int c;
-    while ( ( c = getchar() ) != '\n' && c != EOF );
+    while ( ( c = getchar() ) != '\n' && c != EOF ); // Get characters until newline is hit.
 }
 
 
@@ -140,16 +152,24 @@ audioFile* allocateAudioFileMem( void ) {
 }
 
 
+int freeAudioFileMem( audioFile *file ) {
+    if ( file == NULL ) {
+        return -1;
+    }
+    free( file );
+    
+    return 0;
+}
+
+
 int openInputFile( audioFile *file, char *filename ) {
     
-    file->infoFile.format = 0;
+    file->infoFile.format = 0; // Requested by libsnd documentation.
     
     file->audioFile = sf_open( filename, SFM_READ, &file->infoFile );
     if ( file->audioFile == NULL ) {
         return 1;
     }
-    
-    //sf_command ( file->audioFile, SFC_SET_CLIPPING, NULL, SF_TRUE );
     
     return 0;
 }
@@ -164,6 +184,7 @@ int openOutputFile( audioFile *file, char *filename, audioFile *settings ) {
         return 1;
     }
     
+    /* Set hard clipping for output file. */
     sf_command ( file->audioFile, SFC_SET_CLIPPING, NULL, SF_TRUE );
    
     return 0;

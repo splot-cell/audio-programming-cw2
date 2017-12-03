@@ -15,7 +15,7 @@
 
 /* GLOBALS */
 extern const int g_minFilterFreq;
-extern const int g_maxFilterFreq;
+extern const int g_maxFilterFreq; // Max filter frequency is also limited by Nyquist.
 extern const int g_filterOrder;
 extern const int g_maxBufferSize;
 extern const int g_minBufferSize;
@@ -64,6 +64,9 @@ int destroyUserDataStruct( userInput *data );
 void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions );
 
 
+/*      openFiles()
+ * Opens files from filenames in <userData>.
+ * Attempts to open <inputFile> and then <outputFile>. */
 void openFiles( userInput *userData, audioFile **inputFile, audioFile **outputFile );
 
 

@@ -40,14 +40,14 @@ typedef enum FILTER_ERROR_ENUM {
     FILT_MEM_ERR, // Error allocating or accessing memory.
     FILT_ARG_NULL, // Fuction has been passed NULL pointer.
     FILT_OOB_ARG, // Function has been passed an argument out of parameter bounds.
-    FILT_TYPE_ERR, //
+    FILT_TYPE_ERR, // Error related to selected filter type.
     FILT_FILE_ERR // Error relating to tempory file for memory handling.
 } firErr;
 
 
 /* GLOBALS */
 
-extern firErr g_FILT_ERR;
+extern firErr g_FILT_ERR; // For returning error code from createFilter().
 
 
 /* FUNCTION PROTOTYPES */
@@ -68,14 +68,18 @@ firErr destroyFilter( firFilter *filter );
 
 /*      setCoefficients()
  * Sets the coefficients of <filter> based on the chosen <samplerate> (Hz) and <cutoff> frequency (Hz).
- * Coefficients generate windowed low-pass response, using <window> specified.
+ * Low-pass or high-pass response selected during filter creation using enum above.
+ * Coefficients generated using <window> specified.
  * Returns FILT_NO_ERR if successful.
  * Returns FILT_ARG_NULL if <filter> is NULL. */
 firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWindow window );
 
 
 /*      processBuffer()
- * */
+ * Iterates through <numSamples> samples in <buffer>, applying effects of <filter>.
+ * Returns FILT_NO_ERR if successful.
+ * Returns FILT_ARG_NULL if <filter> or <buffer> is NULL.
+ * Returns FILT_OOB_ARG if numSamples < 0. */
 firErr processBuffer( firFilter *filter, double *buffer, int numSamples );
 
 

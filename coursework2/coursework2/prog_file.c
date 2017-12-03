@@ -32,7 +32,7 @@ static FILE *g_tempFiles;
 /* PRIVATE FUNCTION PROTOTYPES */
 
 /*      optionalArgumentHandler()
- * Handles optional arguments from the comand line.
+ * Handles optional arguments from the comand line, writes the result to <userOptions>.
  * <argc> = argc from command line.
  * <argv> = argv from command line.
  * <userOptions> = pointer to userInput struct for storing user input. */
@@ -49,23 +49,19 @@ void allocFilenameMem( char **filename, unsigned long length );
 bool wavFilenameHandler( char **filename, char mode );
 
 
-/*      strToInt()
- * A more robust way of casting a string to an integer.
- * <str> = string to be converted, must contain valid integer in string format.
- * <output> = pointer to int destination.
- * <lowerLimit> = lowest acceptable value (should be INT_MIN or higher).
- * <upperLimit> = highest acceptable value (should be INT_MAX or higher).
- * Returns zero if int is within the limits specified.
- * Returns 1 if int is outside of limits specified. */
-int strToInt( char *str, int *output, int lowerLimit, int upperLimit );
-
-
+/*      checkAudioFileMono()
+ * Checks whether <file> is one channel. If so returns. If not then throws error. */
 void checkAudioFileMono( audioFile *file );
 
 
+/*      fileOpened()
+ * For tracking files opened by the program.
+ * Adds <ptr> to g_tempFiles. */
 void fileOpened( audioFile *ptr );
 
 
+/*      closeOpenFiles()
+ * Iterates through files pointed to in g_tempFiles and closes them. */
 void closeOpenFiles( void );
 
 
@@ -103,6 +99,7 @@ int destroyUserDataStruct( userInput *data ) {
 void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
     optionalArgumentHandler( argc, argv, userOptions );
     
+    /* Check number of required arguments. */
     int providedArg = argc - optind;
     if ( providedArg != 3 ) {
         errorHandler( BAD_COMMAND_LINE, "Could not continue, incorrect number of arguments detected." );
@@ -114,7 +111,8 @@ void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions 
 //    
 //    strcpy( userOptions->inputFilename, argv[ argc - 3] );
 //    strcpy( userOptions->outputFilename, argv[ argc - 2] );
-
+    
+    /* Required arguments are placed at end of argv by getopt, provided user input was valid. */
     userOptions->inputFilename = argv[ argc - 3 ];
     userOptions->outputFilename = argv[ argc - 2 ];
     
@@ -144,6 +142,7 @@ void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions 
 
 
 void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
+    /* Set up options. */
     struct option optionalArgs[] = {
         { "window", required_argument, 0, 'w' },
         { "highpass", no_argument, 0, 'h' },
@@ -153,9 +152,10 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
     int optionIndex = 0;
     char option;
     
+    /* Iterate through argv. */
     while ( ( option = getopt_long( argc, argv, "w:hb:", optionalArgs, &optionIndex ) ) != -1 ) {
         switch ( option ) {
-            case 'w':
+            case 'w': // WINDOWING
                 if ( strcmp( optarg, "rect" ) == 0 ) {
                     userOptions->windowing = WINDOW_RECTANGULAR;
                 }
@@ -173,25 +173,30 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
                 }
                 else {
                     fprintf( stderr,
-                            "Invalid option '%s' for windowing.\nWill try to continue using default: bartlett.\n",
-                            optarg );
+                            "Invalid option '%s' for windowing.\n"
+                            "Will try to continue using default: Bartlett.\n", optarg );
                 }
                 break;
-            case 'h':
+                
+            case 'h': // HIGHPASS FILTER
                 userOptions->filterType = TYPE_HIGHPASS;
                 break;
-            case 'b':
+                
+            case 'b': // BUFFER SIZE
                 if ( isOnlyPositiveInt( optarg ) == false ) {
                     errorHandler( BAD_COMMAND_LINE, "Buffer size must be a positive integer." );
                 }
+                
                 if ( strToInt( optarg, &( userOptions->bufferSize ), g_minBufferSize, g_maxBufferSize ) != 0 ) {
                     errorHandler( OUT_OF_BOUNDS_VALUE, "Buffer size is outside required range." );
                 }
+                
                 if ( ( userOptions->bufferSize % g_minBufferSize ) != 0 ) {
                     errorHandler( BAD_COMMAND_LINE, "Buffer size must be a power of 2." );
                 }
                 break;
-            case '?':
+                
+            case '?': // Equivalent to default case.
                 if ( optopt == 'w' ) {
                     fprintf( stderr, "Option -w requires an argument. Using default: bartlett.\n" );
                 }
@@ -200,7 +205,7 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
                     sprintf( error, "Unknown option '-%c'.", optopt );
                     errorHandler( BAD_COMMAND_LINE, error );
                 }
-                else {
+                else { // Should not occur.
                     char error[100];
                     sprintf( error, "Unknown option character '\\x%x'.\n", optopt );
                     errorHandler( BAD_COMMAND_LINE, error );
@@ -270,16 +275,6 @@ void allocFilenameMem( char **filename, unsigned long length ) {
 }
 
 
-int strToInt( char *str, int *output, int lowerLimit, int upperLimit ) {
-    long int x = strtol( str, NULL, 10 ); // More robust conversion than atoi.
-    if ( x > upperLimit || x < lowerLimit ) {
-        return 1;
-    }
-    *output = (int) x;
-    return 0;
-}
-
-
 void initFileTracking( void ) {
     g_tempFiles = tmpfile();
     if ( g_tempFiles == NULL ) {
@@ -316,7 +311,9 @@ void errorHandler( int code, char *info ) {
 void cleanupMemory( userInput *userOptions, audioFile *inputFile, audioFile *outputFile, firFilter *filter ) {
     destroyUserDataStruct( userOptions );
     closeAudioFile( inputFile );
+    freeAudioFileMem( inputFile );
     closeAudioFile( outputFile );
+    freeAudioFileMem( outputFile );
     destroyFilter( filter );
 }
 
@@ -380,7 +377,11 @@ void printHelp( void ) {
         "--buffersize <desired size>",
         "",
         "With a <desired size> between 64 and 2048 samples! Note, you must use a",
-        "power of two. 128 samples is the default, but 256 will blow you away!"
+        "power of two. 128 samples is the default, but 256 will blow you away!",
+        "",
+        "References:",
+        "",
+        "Henry, Craig, 2017: Personal correspondance with the author."
     };
     printWithBorder( helpText, ( sizeof( helpText ) / sizeof( helpText[ 0 ] ) ), 1 );
     
