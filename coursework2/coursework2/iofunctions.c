@@ -88,32 +88,39 @@ void flushStdIn( void ) {
 
 
 void printWithBorder( char *message[], int rows, int borderWidth ) {
+    int fmtChr = 1; // Number of characters at beginning of row used for formatting.
     
-    /* Set up border parameters */
+    /* Set up border parameters. */
     int pad = 1, numColumns = 80,
     numRows = rows  + ( 2 * ( pad + borderWidth ) );
     
-    for ( int r = 0; r < numRows; ++r ) { // Cycle through each row
-        for ( int c = 0; c < numColumns; ++c ) { // Cycle through each character in the row
+    for ( int r = 0; r < numRows; ++r ) { // Cycle through each row.
+        for ( int c = 0; c < numColumns; ++c ) { // Cycle through each character in the row.
             
-            /* If we're in the border rows or characters */
+            /* If we're in the border rows or characters. */
             if ( r < borderWidth || r >= numRows - borderWidth ||
                 c < borderWidth || c >= numColumns - borderWidth ) {
                 printf( "%c", '*' );
             }
             
-            /* If we're wthin the padding rows or characters */
+            /* If we're wthin the padding rows or characters. */
             else if ( r < pad + borderWidth || r >= numRows - borderWidth - pad ||
                      c < pad + borderWidth || c >= numColumns - borderWidth - pad ) {
                 printf( "%c", ' ' );
             }
             
             
-            else { // We must now be in the rows and character 'columns' with potential text
+            else { // We must now be in the rows and character 'columns' with potential text.
                 
-                /* Integer divide remainig whitespace by 2 */
-                int centreOffset = (int) ( ( numColumns -
-                                            strlen( message[ r - borderWidth - pad ] ) ) / 2 ) - pad - borderWidth;
+                /* Set up whitespace for centre justification. */
+                int centreOffset = 0;
+                
+                /* If the first character of the row is 'c' set offset to half the width */
+                if ( message[ r - borderWidth - pad ][ 0 ] == 'c' ) {
+                    centreOffset = (int) ( ( numColumns -
+                                            strlen( message[ r - borderWidth - pad ] ) - fmtChr ) / 2 ) - pad - borderWidth;
+
+                }
                 
                 /* Fill in whitespace before printing message */
                 if ( c - borderWidth - pad < centreOffset ) {
@@ -124,7 +131,7 @@ void printWithBorder( char *message[], int rows, int borderWidth ) {
                 else if ( strlen( message[ r - borderWidth - pad ] ) >
                          c - centreOffset - borderWidth - pad ) {
                     printf( "%c",
-                           message[ r-borderWidth-pad ][ c - centreOffset - borderWidth - pad ] );
+                           message[ r-borderWidth-pad ][ c - centreOffset - borderWidth - pad + fmtChr ] );
                 }
                 
                 /* Finishing whitespace */

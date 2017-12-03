@@ -346,7 +346,7 @@ void cleanupMemory( userInput *userOptions, audioFile *inputFile, audioFile *out
 void printHelp( void ) {
     
     char *helpTitle[] = {
-        "OLLY'S WONDEROUS COURSEWORK SUBMISSION 2:",
+        "cOLLY'S WONDEROUS COURSEWORK SUBMISSION 2:",
         "THE FILTERING",
         "\"This time it's personal.\"",
         "---",
