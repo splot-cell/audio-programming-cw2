@@ -24,7 +24,7 @@ void resetg_buf( void ) {
 
 
 void createFilter_returnsPointerToFilter( qunittest_t *test ) {
-    firFilter *filter = createFilter( 1, g_buf );
+    firFilter *filter = createFilter( 1, g_buf, TYPE_LOWPASS );
     bool retVal = true;
     if ( filter == NULL ) {
         retVal = false;
@@ -38,7 +38,7 @@ void createFilter_returnsPointerToFilter( qunittest_t *test ) {
 
 void filterDataCorrectSize( qunittest_t *test ) {
     const int size = 1;
-    firFilter *filter = createFilter( size - 1, g_buf );
+    firFilter *filter = createFilter( size - 1, g_buf, TYPE_LOWPASS );
     double **data = getData( filter );
     int *order = getOrder( filter );
     
@@ -58,7 +58,7 @@ void filterDataCorrectSize( qunittest_t *test ) {
     destroyFilter( filter );
     
     const int size2 = 130;
-    firFilter *filter2 = createFilter( size2 - 1, g_buf );
+    firFilter *filter2 = createFilter( size2 - 1, g_buf, TYPE_LOWPASS );
     double **data2 = getData( filter2 );
     int *order2 = getOrder( filter2 );
     
@@ -80,7 +80,7 @@ void filterDataCorrectSize( qunittest_t *test ) {
 
 void getCoefficients_getsCoefficients( qunittest_t *test ) {
     const int size = 6;
-    firFilter *filter = createFilter( size - 1, g_buf );
+    firFilter *filter = createFilter( size - 1, g_buf, TYPE_LOWPASS );
     double **data = getData( filter );
     
     double coeffs[ size ] = { 1, 3, 4, 6, 2, 19 };
@@ -101,7 +101,7 @@ void getCoefficients_getsCoefficients( qunittest_t *test ) {
 
 void getCoefficients_hasZeros( qunittest_t *test ) {
     const int size = 19;
-    firFilter *filter = createFilter( size - 1, g_buf );
+    firFilter *filter = createFilter( size - 1, g_buf, TYPE_LOWPASS );
     double **data = getData( filter );
     
     double coeffs[ 6 ] = { 5, 4, 5, 2, 5, 5.6 };
@@ -123,7 +123,7 @@ void getCoefficients_hasZeros( qunittest_t *test ) {
 
 void setCoefficients_calculatesCorrectly( qunittest_t *test ) {
     const int order = 20;
-    firFilter *filter = createFilter( order, g_buf );
+    firFilter *filter = createFilter( order, g_buf, TYPE_LOWPASS );
     
     int x = setCoefficients( filter, 2000, 460, WINDOW_RECTANGULAR );
     
@@ -159,29 +159,46 @@ void setAllCoefficientsToOne( firFilter *filter, int order ) {
 
 void processingTests( qunittest_t *test ) {
     const int order = 9;
-    firFilter *filter = createFilter( order, g_buf );
+    firFilter *filter = createFilter( order, g_buf, TYPE_LOWPASS );
     const int bufSize = 20;
-    double inBuffer[ bufSize ] = { 1, 0 };
-    double coeffs[] = { 12, 13, 10, 20, 5.4, 32, 0.04, 10, 1, 0.4, 9 };
+    double inBuffer[ bufSize ] = { 1, 0 }; // Dirac
+    double coeffs[] = { 12, 13, 10, 20, 5.4, 32, 0.04, 10, 1, 0.4 };
     double **data = getData( filter );
     
-    for ( int i = 0; i < 6; ++i ) {
+    for ( int i = 0; i < order + 1; ++i ) {
         *( *data + i ) = coeffs[ i ];
     }
     
-    for ( int i = 0; i < bufSize; ++i ) {
-        printf( "%f\n", inBuffer[ i ] );
-    }
-    
-    int x = processBuffer( filter, inBuffer, bufSize );
-    
-    qtest_assert_true( x == bufSize, "Process buffer correct count", test );
+    processBuffer( filter, inBuffer, bufSize );
     
     for ( int i = 0; i < order + 1; ++i ) {
-        qtest_assert_true( inBuffer[ i ] == coeffs[ i ], "Diract samples correct", test );
+        char str[ 100 ];
+        sprintf( str,  "Dirac sample expected: %f actual: %f", coeffs[ i ], inBuffer[ i ] );
+        qtest_assert_true( inBuffer[ i ] == coeffs[ i ], str, test );
     }
     
     destroyFilter( filter );
+    
+    firFilter *filter2 = createFilter( order, g_buf, TYPE_LOWPASS );
+    double inBuffer2[ bufSize ] = { 1, 0, 1, 0 }; // Dirac x2
+    double **data2 = getData( filter2 );
+    
+    double expOutBuf[ bufSize ] = { 12, 13, 22, 33, 15.4, 52, 5.44, 42,
+            1.04, 10.4, 1, 0.4, 0, };
+    
+    for ( int i = 0; i < order + 1; ++i ) {
+        *( *data2 + i ) = coeffs[ i ];
+    }
+    
+    processBuffer( filter2, inBuffer2, bufSize );
+    
+    for ( int i = 0; i < bufSize; ++i ) {
+        char str[ 100 ];
+        sprintf( str,  "Dirac sample expected: %f actual: %f", expOutBuf[ i ], inBuffer2[ i ] );
+        qtest_assert_true( inBuffer2[ i ] == expOutBuf[ i ], str, test );
+    }
+    
+    destroyFilter( filter2 );
 }
 
 

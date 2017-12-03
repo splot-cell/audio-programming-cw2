@@ -61,6 +61,7 @@ userInput* createUserDataStruct( void ) {
     memAllocated( data );
     data->inputFilename = NULL;
     data->outputFilename = NULL;
+    data->filterType = TYPE_LOWPASS; // Set default functionality
     return data;
 }
 

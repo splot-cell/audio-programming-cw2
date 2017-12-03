@@ -38,7 +38,12 @@ int main( int argc, char * argv[] ) {
     
     /* Open files and create filter. */
     openFiles( userData, &inputFile, &outputFile );
-    if ( ( filter = createFilter( g_filterOrder, filterDelayLine ) ) == NULL ) {
+    
+    
+    // Check cut off vs nyquist here
+    
+    
+    if ( ( filter = createFilter( g_filterOrder, filterDelayLine, userData->filterType ) ) == NULL ) {
         printf( "Filter error code: %d\n", g_FILT_ERR );
         errorHandler( BAD_MEMORY, "Filter creation failed." );
     }
@@ -51,14 +56,14 @@ int main( int argc, char * argv[] ) {
     do {
         count = readAudioDouble( inputFile, buffer, userData->bufferSize );
         
-//        /* Flush buffer logic. */
-//        if ( count != userData->bufferSize ) {
-//            do {
-//                buffer [ ( count + tailCount ) % userData->bufferSize ] = 0;
-//                ++tailCount;
-//            } while ( ( count + tailCount ) % userData->bufferSize != 0 &&
-//                     tailCount != g_filterOrder ); // While it's not the end of the buffer.
-//        }
+        /* Flush buffer logic. */
+        if ( count != userData->bufferSize ) {
+            do {
+                buffer [ ( count + tailCount ) % userData->bufferSize ] = 0;
+                ++tailCount;
+            } while ( ( count + tailCount ) % userData->bufferSize != 0 &&
+                     tailCount != g_filterOrder ); // While it's not the end of the buffer.
+        }
         
         if ( processBuffer( filter, buffer, count + tailCount ) != FILT_NO_ERR ) {
             errorHandler( BAD_BUFFER_PROCESS, "Error processing audio buffer." );

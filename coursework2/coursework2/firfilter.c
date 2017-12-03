@@ -25,6 +25,7 @@ typedef struct firfilter_struct {
     int numCoeffs;
     double *delayLine;
     int delayLineIndex;
+    filterType type;
 } firFilter;
 
 
@@ -47,7 +48,7 @@ firErr filtMemAllocated( void *ptr );
 
 /* FUNCTION DEFINITIONS */
 
-firFilter* createFilter( int order, double *circularBuffer ) {
+firFilter* createFilter( int order, double *circularBuffer, filterType type ) {
     firFilter *filter = malloc( sizeof( firFilter ) );
     if ( filter == NULL ) {
         g_FILT_ERR = FILT_MEM_ERR;
@@ -71,6 +72,7 @@ firFilter* createFilter( int order, double *circularBuffer ) {
     filter->numCoeffs = order + 1;
     filter->delayLine = circularBuffer;
     filter->delayLineIndex = 0;
+    filter->type = type;
     
     if ( initDelayLine( filter ) != FILT_NO_ERR ) {
         g_FILT_ERR = FILT_MEM_ERR;
@@ -101,15 +103,32 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
         return FILT_ARG_NULL;
     }
     
-    double ft = cutoff / (double) samplerate;
-    float M = filter->numCoeffs - 1;
+    /* High pass filters must have an odd num of coefficients. */
+    if ( ( filter->numCoeffs % 2 ) == 0 && filter->type == TYPE_HIGHPASS ) {
+        return FILT_TYPE_ERR;
+    }
     
-    for ( int i = 0; i < filter->numCoeffs; ++i ) {
-        if ( i == M / 2 ) {
+    double ft = cutoff / (double) samplerate;
+    if ( ft >= 0.5 ) { // Cut-off should be less than half the sample frequency
+        return FILT_OOB_ARG;
+    }
+    
+    float M_2 = ( filter->numCoeffs - 1 ) / 2; // Filter order divided by 2
+    
+    for ( int i = 0; i < filter->numCoeffs / 2.0; ++i ) {
+        if ( i == M_2 ) {
             filter->coeffs[ i ] = 2 * ft;
+            if ( filter->type == TYPE_HIGHPASS ) {
+                filter->coeffs[ i ] = 1 - filter->coeffs[ i ];
+            }
         }
         else {
-            filter->coeffs[ i ] = sin( g_tau * ft * ( i - ( M / 2 ) ) ) / ( g_pi * ( i - ( M / 2 ) ) );
+            if ( filter->type == TYPE_HIGHPASS ) {
+                ft = -ft;
+            }
+            filter->coeffs[ i ] = sin( g_tau * ft * ( i - M_2 ) ) / ( g_pi * ( i - M_2 ) );
+            /* Coefficients are symetrical so only calculate half of them */
+            filter->coeffs[ filter->numCoeffs - i - 1 ] = filter->coeffs[ i ];
         }
     }
     
@@ -131,6 +150,21 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
         default:
             break;
     }
+    
+    return FILT_NO_ERR;
+}
+
+
+firErr setFilterType( firFilter *filter, filterType type ) {
+    if ( filter == NULL ) {
+        return FILT_ARG_NULL;
+    }
+    
+    if ( type != TYPE_LOWPASS && type != TYPE_HIGHPASS ) {
+        return FILT_TYPE_ERR;
+    }
+    
+    filter->type = type;
     
     return FILT_NO_ERR;
 }

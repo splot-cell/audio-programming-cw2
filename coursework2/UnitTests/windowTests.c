@@ -13,7 +13,7 @@
 
 void bartTests( qunittest_t *test ) {
     const int order = 20;
-    firFilter *filter = createFilter( 20, g_buf );
+    firFilter *filter = createFilter( 20, g_buf, TYPE_LOWPASS );
     
     setAllCoefficientsToOne( filter, order );
     
@@ -35,7 +35,7 @@ void bartTests( qunittest_t *test ) {
 
 void hannTests( qunittest_t *test ) {
     const int order = 20;
-    firFilter *filter = createFilter( 20, g_buf );
+    firFilter *filter = createFilter( 20, g_buf, TYPE_LOWPASS );
     
     setAllCoefficientsToOne( filter, order );
     
@@ -60,7 +60,7 @@ void hannTests( qunittest_t *test ) {
 
 void hammTests( qunittest_t *test ) {
     const int order = 20;
-    firFilter *filter = createFilter( 20, g_buf );
+    firFilter *filter = createFilter( 20, g_buf, TYPE_LOWPASS );
     
     setAllCoefficientsToOne( filter, order );
     
@@ -85,7 +85,7 @@ void hammTests( qunittest_t *test ) {
 
 void blkTests( qunittest_t *test ) {
     const int order = 20;
-    firFilter *filter = createFilter( 20, g_buf );
+    firFilter *filter = createFilter( 20, g_buf, TYPE_LOWPASS );
     
     setAllCoefficientsToOne( filter, order );
     

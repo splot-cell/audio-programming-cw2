@@ -44,6 +44,7 @@ typedef enum FILTER_ERROR_ENUM {
     FILT_MEM_ERR, // Error allocating or accessing memory.
     FILT_ARG_NULL, // Fuction has been passed NULL pointer.
     FILT_OOB_ARG, // Function has been passed an argument out of parameter bounds.
+    FILT_TYPE_ERR, //
     FILT_FILE_ERR // Error relating to tempory file for memory handling.
 } firErr;
 
@@ -59,7 +60,7 @@ extern firErr g_FILT_ERR;
  * Creates FIR filter struct to contain a filter of order <order>.
  * <circularBuffer> = pointer to an array of doubles of size order + 1.
  * Returns NULL and sets g_FILT_ERR to relevent error code if unsuccessful. */
-firFilter* createFilter( int order, double *circularBuffer );
+firFilter* createFilter( int order, double *circularBuffer, filterType type );
 
 
 /*      destroyFilter()
@@ -82,7 +83,8 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
 firErr processBuffer( firFilter *filter, double *buffer, int numSamples );
 
 
-firErr flushFilter( firFilter *filter, double *buffer, int numSamples );
+// Unused but useful
+firErr setFilterType( firFilter *filter, filterType type );
 
 
 /*      initiFiltErrHandling()
