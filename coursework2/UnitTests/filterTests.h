@@ -8,10 +8,6 @@
 #ifndef filterTests_h
 #define filterTests_h
 
-#include <stdlib.h>
-#include <stdbool.h>
-#include <time.h>
-
 #include "qtest/testsuite.h"
 #include "firfilter.h"
 
@@ -39,6 +35,9 @@ void getCoefficients_hasZeros( qunittest_t *test );
 void setCoefficients_calculatesCorrectly( qunittest_t *test );
 
 
+void setCoefficients_highpassCorrect( qunittest_t *test );
+
+
 void setCoefficients_returnsMinusOne( qunittest_t *test );
 
 
@@ -58,6 +57,12 @@ void blkTests( qunittest_t *test );
 
 
 void processingTests( qunittest_t *test );
+
+
+void setCoefficients_highPassError( qunittest_t *test );
+
+
+void createFilter_highPassError( qunittest_t *test );
 
 
 void addFilterTests( qtestsuite_t *testsuite );

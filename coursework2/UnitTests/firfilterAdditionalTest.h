@@ -9,6 +9,13 @@
 #define firfilterAdditionalTest_h
 
 
+/* DELCARE DATA TYPES */
+
+typedef enum FILTER_TYPE_ENUM filterType;
+
+typedef enum FILTER_ERROR_ENUM firErr;
+
+
 /* ADDITIONAL FUNCTION PROTOTYPES FOR TESTING */
 
 typedef struct firfilter_struct firFilter;
@@ -26,6 +33,8 @@ void applyHanningWindow( firFilter *filter );
 void applyHammingWindow( firFilter *filter );
 
 void applyBlackmanWindow( firFilter *filter );
+
+firErr setFilterType( firFilter *filter, filterType type );
 
 
 #endif // firfilterAdditionalTest_h

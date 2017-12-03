@@ -7,6 +7,7 @@
 
 #include "test_header.h"
 
+#include "errors.h"
 
 int main() {
     

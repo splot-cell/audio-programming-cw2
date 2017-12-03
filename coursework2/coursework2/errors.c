@@ -5,9 +5,11 @@
 //  Created by Olly Seber on 25/11/2017.
 //
 
-#include <stdio.h>
-
 #include "errors.h"
+
+#include <stdlib.h> // For exit() and free().
+#include <stdio.h> // For fprintf().
+
 
 /* GLOBALS */
 
@@ -48,7 +50,6 @@ void programExit( int code, char *info ) {
     deallocateMem();
     if ( code != NO_ERR ) {
         fprintf( stderr, "ERROR: code %d\n%s\n", code, info );
-        exit( EXIT_FAILURE ); // exit() does not like negative error codes, so code is printed then exit called
     }
-    exit( EXIT_SUCCESS );
+    exit( code );
 }

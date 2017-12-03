@@ -7,6 +7,11 @@
 
 #include "iofunctions.h"
 
+#include <stdlib.h> // For calloc() and free().
+#include <string.h> // For strlen().
+
+#include "sndfile.h" // For audio file manipulation.
+
 
 /* TYPE DEFINITIONS */
 
@@ -70,6 +75,58 @@ void flushStdIn( void ) {
 }
 
 
+void printWithBorder( char *message[], int rows, int borderWidth ) {
+    
+    /* Set up border parameters */
+    int pad = 1, numColumns = 80,
+    numRows = rows  + ( 2 * ( pad + borderWidth ) );
+    
+    for ( int r = 0; r < numRows; ++r ) { // Cycle through each row
+        for ( int c = 0; c < numColumns; ++c ) { // Cycle through each character in the row
+            
+            /* If we're in the border rows or characters */
+            if ( r < borderWidth || r >= numRows - borderWidth ||
+                c < borderWidth || c >= numColumns - borderWidth ) {
+                printf( "%c", '*' );
+            }
+            
+            /* If we're wthin the padding rows or characters */
+            else if ( r < pad + borderWidth || r >= numRows - borderWidth - pad ||
+                     c < pad + borderWidth || c >= numColumns - borderWidth - pad ) {
+                printf( "%c", ' ' );
+            }
+            
+            
+            else { // We must now be in the rows and character 'columns' with potential text
+                
+                /* Integer divide remainig whitespace by 2 */
+                int centreOffset = (int) ( ( numColumns -
+                                            strlen( message[ r - borderWidth - pad ] ) ) / 2 ) - pad - borderWidth;
+                
+                /* Fill in whitespace before printing message */
+                if ( c - borderWidth - pad < centreOffset ) {
+                    printf( "%c", ' ' );
+                }
+                
+                /* Printing message */
+                else if ( strlen( message[ r - borderWidth - pad ] ) >
+                         c - centreOffset - borderWidth - pad ) {
+                    printf( "%c",
+                           message[ r-borderWidth-pad ][ c - centreOffset - borderWidth - pad ] );
+                }
+                
+                /* Finishing whitespace */
+                else {
+                    printf( "%c", ' ' );
+                }
+            }
+        }
+        printf( "%c", '\n' );
+    }
+    return;
+}
+
+
 /* For audio IO */
 
 
@@ -78,8 +135,7 @@ audioFile* allocateAudioFileMem( void ) {
     if ( file == NULL ) {
         return NULL;
     }
-    memAllocated( file );
-    
+
     return file;
 }
 
@@ -90,12 +146,12 @@ int openInputFile( audioFile *file, char *filename ) {
     
     file->audioFile = sf_open( filename, SFM_READ, &file->infoFile );
     if ( file->audioFile == NULL ) {
-        return BAD_FILE_OPEN;
+        return 1;
     }
     
     //sf_command ( file->audioFile, SFC_SET_CLIPPING, NULL, SF_TRUE );
     
-    return NO_ERR;
+    return 0;
 }
 
 
@@ -105,27 +161,27 @@ int openOutputFile( audioFile *file, char *filename, audioFile *settings ) {
     
     file->audioFile = sf_open( filename, SFM_WRITE, &file->infoFile );
     if ( file->audioFile == NULL ) {
-        return BAD_FILE_OPEN;
+        return 1;
     }
     
     sf_command ( file->audioFile, SFC_SET_CLIPPING, NULL, SF_TRUE );
    
-    return NO_ERR;
+    return 0;
 }
 
 
 int closeAudioFile( audioFile *file ) {
     if ( file == NULL ) {
-        return NULL_FUNC_ARG;
+        return -1;
     }
     sf_close( file->audioFile );
-    return NO_ERR;
+    return 0;
 }
 
 
 int getSampleRate( audioFile *file ) {
     if ( file == NULL ) {
-        return NULL_FUNC_ARG;
+        return -1;
     }
     return file->infoFile.samplerate;
 }
@@ -133,7 +189,7 @@ int getSampleRate( audioFile *file ) {
 
 int getChannelCount( audioFile *file ) {
     if ( file == NULL ) {
-        return NULL_FUNC_ARG;
+        return -1;
     }
     return file->infoFile.channels;
 }
@@ -141,7 +197,7 @@ int getChannelCount( audioFile *file ) {
 
 int readAudioDouble( audioFile *file, double *buffer, int sizeOfBuffer ) {
     if ( file == NULL || buffer == NULL ) {
-        return NULL_FUNC_ARG;
+        return -1;
     }
     return (int) sf_read_double( file->audioFile, buffer, sizeOfBuffer );
 }
@@ -149,11 +205,11 @@ int readAudioDouble( audioFile *file, double *buffer, int sizeOfBuffer ) {
 
 int writeAudioDouble( audioFile *file, double *buffer, int numSamples ) {
     if ( file == NULL || buffer == NULL ) {
-        return NULL_FUNC_ARG;
+        return -1;
     }
     int written = (int) sf_write_double( file->audioFile, buffer, numSamples );
     if ( written != numSamples ) {
-        return BAD_FILE_WRITE;
+        return -2;
     }
     return written;
 }

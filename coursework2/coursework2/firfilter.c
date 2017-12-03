@@ -7,15 +7,19 @@
 
 #include "firfilter.h"
 
+#include <stdlib.h> // For malloc() and free().
+#include <stdio.h> // For printf().
+#include <math.h> // For sin().
+
 
 /* GLOBALS */
 
 const double g_pi = 3.14159265359;
 const double g_tau = 2 * g_pi;
 
-firErr g_FILT_ERR;
+firErr g_FILT_ERR; // For returning an error from certain functions.
 
-static FILE *g_filtTemp;
+static FILE *g_filtTemp; // For tracking memory usage
 
 
 /* TYPE DEFINITIONS */
@@ -31,8 +35,13 @@ typedef struct firfilter_struct {
 
 /* PRIVATE FUNCTION PROTOTYPES */
 
+/*      initDelayLine()
+ * Sets all coefficient datra of <filter> to zero. */
 firErr initDelayLine( firFilter *filter );
 
+
+/*      Window fuctions:
+ * Apply the respective window weighting to <filter>. */
 void applyBartlettWindow( firFilter *filter );
 
 void applyHanningWindow( firFilter *filter );
@@ -41,20 +50,26 @@ void applyHammingWindow( firFilter *filter );
 
 void applyBlackmanWindow( firFilter *filter );
 
-void filterfatalError( firErr code, char *info );
 
+/*      filtMemAllocated()
+ * For dynamic memory tracking. Adds <ptr> to g_filtTemp file. */
 firErr filtMemAllocated( void *ptr );
 
 
 /* FUNCTION DEFINITIONS */
 
 firFilter* createFilter( int order, double *circularBuffer, filterType type ) {
+    if ( type == TYPE_HIGHPASS && ( order % 2 ) != 0 ) { // Highpass filters must have an even order
+        g_FILT_ERR = FILT_TYPE_ERR;                      // i.e. odd number of coefficients.
+        return NULL;
+    }
+    
     firFilter *filter = malloc( sizeof( firFilter ) );
     if ( filter == NULL ) {
         g_FILT_ERR = FILT_MEM_ERR;
         return NULL;
     }
-    if ( filtMemAllocated( filter ) != FILT_NO_ERR ) {
+    if ( filtMemAllocated( filter ) != FILT_NO_ERR ) { // Check file write works
         g_FILT_ERR = FILT_FILE_ERR;
         return NULL;
     }
@@ -113,7 +128,7 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
         return FILT_OOB_ARG;
     }
     
-    float M_2 = ( filter->numCoeffs - 1 ) / 2; // Filter order divided by 2
+    float M_2 = ( filter->numCoeffs - 1 ) / 2.0; // Filter order divided by 2
     
     for ( int i = 0; i < filter->numCoeffs / 2.0; ++i ) {
         if ( i == M_2 ) {
@@ -123,11 +138,13 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
             }
         }
         else {
-            if ( filter->type == TYPE_HIGHPASS ) {
-                ft = -ft;
-            }
             filter->coeffs[ i ] = sin( g_tau * ft * ( i - M_2 ) ) / ( g_pi * ( i - M_2 ) );
-            /* Coefficients are symetrical so only calculate half of them */
+            
+            if ( filter->type == TYPE_HIGHPASS ) {
+                filter->coeffs[ i ] = -filter->coeffs[ i ];
+            }
+            
+            /* Coefficients are symetrical so copy to second half */
             filter->coeffs[ filter->numCoeffs - i - 1 ] = filter->coeffs[ i ];
         }
     }
@@ -150,21 +167,6 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
         default:
             break;
     }
-    
-    return FILT_NO_ERR;
-}
-
-
-firErr setFilterType( firFilter *filter, filterType type ) {
-    if ( filter == NULL ) {
-        return FILT_ARG_NULL;
-    }
-    
-    if ( type != TYPE_LOWPASS && type != TYPE_HIGHPASS ) {
-        return FILT_TYPE_ERR;
-    }
-    
-    filter->type = type;
     
     return FILT_NO_ERR;
 }
@@ -272,16 +274,35 @@ void filtFreeMem( void ) {
 
 #ifdef FILTER_TESTS
 
+
 double **getData( firFilter *filter ) {
     return &filter->coeffs;
 }
+
 
 int *getOrder( firFilter *filter ) {
     return &filter->numCoeffs;
 }
 
+
 double *getCoefficients( firFilter *filter ) {
     return filter->coeffs;
 }
+
+
+firErr setFilterType( firFilter *filter, filterType type ) {
+    if ( filter == NULL ) {
+        return FILT_ARG_NULL;
+    }
+    
+    if ( type != TYPE_LOWPASS && type != TYPE_HIGHPASS ) {
+        return FILT_TYPE_ERR;
+    }
+    
+    filter->type = type;
+    
+    return FILT_NO_ERR;
+}
+
 
 #endif // FILTER_TESTS

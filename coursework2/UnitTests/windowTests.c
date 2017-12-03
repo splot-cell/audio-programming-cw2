@@ -8,6 +8,9 @@
 
 #include "filterTests.h"
 
+#include <stdlib.h>
+#include <string.h>
+
 
 /* FUNCTION DEFINITIONS */
 

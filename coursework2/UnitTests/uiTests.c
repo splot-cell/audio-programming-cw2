@@ -47,7 +47,7 @@ void isWav_isCorrect( qunittest_t *test ) {
     qtest_assert_true( !isWavFilename( testString2 ), "Identifies string too short", test );
     
     char *testString3 = "a.wav";
-    qtest_assert_true( isWavFilename( testString3 ), "Identifies string just long enough", test );
+    qtest_assert_true( isWavFilename( testString3 ), "Identifies shortest acceptable string", test );
     
     char *testString4 = "hello.waq";
     qtest_assert_true( !isWavFilename( testString4 ), "Identifies hello.waq", test );

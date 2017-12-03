@@ -8,8 +8,6 @@
 #ifndef test_header_h
 #define test_header_h
 
-#include <stdio.h> // For getc()
-
 #include "qtest/testsuite.h" // Test suite
 
 

@@ -8,13 +8,19 @@
 
 #include "prog_header.h"
 
+#include <stdlib.h> // For calloc() and free().
+#include <stdio.h> // For printf(), fprintf(), sprintf(), getchar().
+#include <string.h> // For strcomp().
+#include <getopt.h> // For getopt().
+#include <ctype.h> // For isprint().
 #include <stdbool.h> // For booleans.
 #include <limits.h> // For converting integers.
 
 /* GLOBAL INITIALISATIONS */
 
-const int g_minFilterFreq = 20;
-const int g_maxFilterFreq = 20000;
+const int g_minFilterFreq = 1;
+const int g_maxFilterFreq = INT_MAX; // Frequency is also limited to less than Nyquist/2, this
+                                     //     provides additional limit if desired.
 const int g_filterOrder = 126;
 const int g_maxBufferSize = 2048;
 const int g_minBufferSize = 64;
@@ -36,10 +42,22 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions );
 void allocFilenameMem( char **filename, unsigned long length );
 
 
+/*      wavFilenameHandler()
+ * Checks whether <filename> ends '.wav' and gives the user the option to append '.wav' if not. 
+ * If <mode> is 'i' then the user prompt speficies "Input filename".
+ * Otherwise the promt specified "Output filename". */
 bool wavFilenameHandler( char **filename, char mode );
 
 
-int strToInt( char *str, int lowerLimit, int upperLimit, char *label );
+/*      strToInt()
+ * A more robust way of casting a string to an integer.
+ * <str> = string to be converted, must contain valid integer in string format.
+ * <output> = pointer to int destination.
+ * <lowerLimit> = lowest acceptable value (should be INT_MIN or higher).
+ * <upperLimit> = highest acceptable value (should be INT_MAX or higher).
+ * Returns zero if int is within the limits specified.
+ * Returns 1 if int is outside of limits specified. */
+int strToInt( char *str, int *output, int lowerLimit, int upperLimit );
 
 
 void checkAudioFileMono( audioFile *file );
@@ -81,11 +99,6 @@ int destroyUserDataStruct( userInput *data ) {
 }
 
 
-void printHelp( void ) {
-    
-    exit( NO_ERR );
-}
-
 
 void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
     optionalArgumentHandler( argc, argv, userOptions );
@@ -95,7 +108,7 @@ void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions 
         errorHandler( BAD_COMMAND_LINE, "Could not continue, incorrect number of arguments detected." );
     }
     
-//    /* Allocate memory for filnames, adding 6 additional characters for '.wav\0'. */
+//    /* Allocate memory for filnames, adding 7 additional characters for '.wav\0'. */
 //    allocFilenameMem( &userOptions->inputFilename, strlen( argv[ argc - 3 ] ) + 7 );
 //    allocFilenameMem( &userOptions->outputFilename, strlen( argv[ argc - 3 ] ) + 7 );
 //    
@@ -106,11 +119,11 @@ void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions 
     userOptions->outputFilename = argv[ argc - 2 ];
     
     if ( isWavFilename(userOptions->inputFilename ) == false ) {
-        errorHandler( BAD_FILE_OPEN, "Input filnemae was not in the format '*.wav'." );
+        errorHandler( BAD_FILE_OPEN, "Input filename was not in the format '*.wav'." );
     }
     
     if ( isWavFilename(userOptions->outputFilename ) == false ) {
-        errorHandler( BAD_FILE_OPEN, "Output filnemae was not in the format '*.wav'." );
+        errorHandler( BAD_FILE_OPEN, "Output filename was not in the format '*.wav'." );
     }
     
 //    if ( wavFilenameHandler( &userOptions->inputFilename, 'i' ) == false ||
@@ -122,8 +135,11 @@ void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions 
     if ( isOnlyPositiveInt( argv[ argc - 1 ] ) == false ) {
         errorHandler( BAD_COMMAND_LINE, "Non-integer character detected in cut-off frequency" );
     }
-    userOptions->filterFrequncy = strToInt( argv[ argc - 1],
-                                           g_minFilterFreq, g_maxFilterFreq, "filter frequency" );
+    
+    if ( strToInt( argv[ argc - 1], &( userOptions->filterFrequncy ),
+                  g_minFilterFreq, g_maxFilterFreq ) != 0 ) {
+        errorHandler( OUT_OF_BOUNDS_VALUE, "Filter frequency outside of acceptable range." );
+    }
 }
 
 
@@ -168,7 +184,9 @@ void optionalArgumentHandler( int argc, char *argv[], userInput *userOptions ) {
                 if ( isOnlyPositiveInt( optarg ) == false ) {
                     errorHandler( BAD_COMMAND_LINE, "Buffer size must be a positive integer." );
                 }
-                userOptions->bufferSize = strToInt( optarg, g_minBufferSize, g_maxBufferSize, "buffer size" );
+                if ( strToInt( optarg, &( userOptions->bufferSize ), g_minBufferSize, g_maxBufferSize ) != 0 ) {
+                    errorHandler( OUT_OF_BOUNDS_VALUE, "Buffer size is outside required range." );
+                }
                 if ( ( userOptions->bufferSize % g_minBufferSize ) != 0 ) {
                     errorHandler( BAD_COMMAND_LINE, "Buffer size must be a power of 2." );
                 }
@@ -197,6 +215,7 @@ void openFiles( userInput *userData, audioFile **inputFile, audioFile **outputFi
     if ( ( *inputFile = allocateAudioFileMem() ) == NULL ) {
         errorHandler( BAD_MEMORY, "Could not allocate memory for input file." );
     }
+    memAllocated( *inputFile );
     
     if ( openInputFile( *inputFile, userData->inputFilename ) != NO_ERR ) {
         errorHandler( BAD_FILE_OPEN, "Could not open input file selected!" );
@@ -208,6 +227,7 @@ void openFiles( userInput *userData, audioFile **inputFile, audioFile **outputFi
     if ( ( *outputFile = allocateAudioFileMem() ) == NULL ) {
         errorHandler( BAD_MEMORY, "Could not allocate memory for output file." );
     }
+    memAllocated( *outputFile );
     
     if ( openOutputFile( *outputFile, userData->outputFilename, *inputFile ) != NO_ERR ) {
         errorHandler( BAD_FILE_OPEN, "Could not open output file selected!" );
@@ -250,14 +270,13 @@ void allocFilenameMem( char **filename, unsigned long length ) {
 }
 
 
-int strToInt( char *str, int lowerLimit, int upperLimit, char *label ) {
+int strToInt( char *str, int *output, int lowerLimit, int upperLimit ) {
     long int x = strtol( str, NULL, 10 ); // More robust conversion than atoi.
     if ( x > upperLimit || x < lowerLimit ) {
-        char error[ 100 ];
-        sprintf( error, "The number %s is out of range for %s.", str, label );
-        errorHandler( OUT_OF_BOUNDS_VALUE, error );
+        return 1;
     }
-    return (int) x;
+    *output = (int) x;
+    return 0;
 }
 
 
@@ -299,4 +318,71 @@ void cleanupMemory( userInput *userOptions, audioFile *inputFile, audioFile *out
     closeAudioFile( inputFile );
     closeAudioFile( outputFile );
     destroyFilter( filter );
+}
+
+
+void printHelp( void ) {
+    
+    char *helpTitle[] = {
+        "OLLY'S WONDEROUS COURSEWORK SUBMISSION 2:",
+        "THE FILTERING",
+        "\"This time it's personal.\"",
+        "---",
+        "-->> Help Documentation <<--"
+    };
+    printWithBorder( helpTitle, ( sizeof ( helpTitle ) / sizeof( helpTitle[ 0 ] ) ), 3 );
+    printf( "\n" );
+    
+    char *helpText[] = {//----------------------------single line character limit---|
+        "This program will apply a low-pass filter to audio from an input wav file",
+        "and write the result to a specified output wav file.",
+        "",
+        "The required argument format is:",
+        "",
+        "<input file path> <output file path> <cut-off frequency>",
+        "",
+        "The input and output paths should NOT contain whitespace. The frequency",
+        "should be an integer in Hz. The frequency range supported is from 1Hz up ",
+        "to just less than half the sample frequency of the selected input file.",
+        "",
+        "---",
+        "",
+        "-->> Optional arguments are now available! <<--",
+        "",
+        "In order to use the once-in-a-lifetime HIGHPASS filter mode, please include:",
+        "",
+        "-h",
+        "or",
+        "--highpass",
+        "",
+        "Before the required arguments.",
+        "",
+        "To get your hands on some never-seen-before WINDOWING options please use:",
+        "",
+        "-w <window specifier>",
+        "or",
+        "--window <window specifier>",
+        "",
+        "The window specifier may be:",
+        "",
+        "rect = Rectangular window function",
+        "bart = Bartlett window function (default)",
+        "hann = Hanning window function",
+        "hamm = Hamming window function (This one's a corker! [Henry, 2017])",
+        "black = Blackman window function",
+        "",
+        "And finally, if you're flying with our luxuary package, you may also like",
+        "to modify the BUFFER SIZE! Don't worry, no pesky dynamic allocation here!",
+        "Simply enter:",
+        "",
+        "-b <desired size>",
+        "or",
+        "--buffersize <desired size>",
+        "",
+        "With a <desired size> between 64 and 2048 samples! Note, you must use a",
+        "power of two. 128 samples is the default, but 256 will blow you away!"
+    };
+    printWithBorder( helpText, ( sizeof( helpText ) / sizeof( helpText[ 0 ] ) ), 1 );
+    
+    errorHandler( NO_ERR, "" );
 }

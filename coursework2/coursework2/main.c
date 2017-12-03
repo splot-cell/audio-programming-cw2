@@ -7,6 +7,9 @@
 
 #include "prog_header.h"
 
+#include <stdlib.h>
+#include <stdio.h>
+
 
 int main( int argc, char * argv[] ) {
     
@@ -36,13 +39,15 @@ int main( int argc, char * argv[] ) {
     double buffer[ g_maxBufferSize ];
     double filterDelayLine[ g_filterOrder + 1 ];
     
-    /* Open files and create filter. */
+    /* Open files. */
     openFiles( userData, &inputFile, &outputFile );
     
+    /* Check selected filter frequency. */
+    if ( userData->filterFrequncy >= 0.5 * getSampleRate( inputFile ) ) {
+        errorHandler( OUT_OF_BOUNDS_VALUE, "Please select a cut-off frequency less than half the sample rate of the input file." );
+    }
     
-    // Check cut off vs nyquist here
-    
-    
+    /* Create filter. */
     if ( ( filter = createFilter( g_filterOrder, filterDelayLine, userData->filterType ) ) == NULL ) {
         printf( "Filter error code: %d\n", g_FILT_ERR );
         errorHandler( BAD_MEMORY, "Filter creation failed." );
@@ -73,7 +78,7 @@ int main( int argc, char * argv[] ) {
             errorHandler( BAD_FILE_WRITE, "Could not write buffer to output file." );
         }
         
-    } while ( g_filterOrder != tailCount && count != 0 ); // REMOVE SPARE COUNT EXPR
+    } while ( g_filterOrder != tailCount );
     
     /* Free memory. */
     cleanupMemory( userData, inputFile, outputFile, filter );

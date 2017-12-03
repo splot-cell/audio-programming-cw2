@@ -8,10 +8,6 @@
 #ifndef firfilter_h
 #define firfilter_h
 
-#include <stdlib.h> // For malloc() and free().
-#include <stdio.h> // For printf().
-#include <math.h> // For sin().
-
 #ifdef FILTER_TESTS
 
 #include "firfilterAdditionalTest.h"
@@ -81,10 +77,6 @@ firErr setCoefficients( firFilter *filter, int samplerate, double cutoff, firWin
 /*      processBuffer()
  * */
 firErr processBuffer( firFilter *filter, double *buffer, int numSamples );
-
-
-// Unused but useful
-firErr setFilterType( firFilter *filter, filterType type );
 
 
 /*      initiFiltErrHandling()

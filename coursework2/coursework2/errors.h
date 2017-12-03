@@ -8,9 +8,6 @@
 #ifndef errors_h
 #define errors_h
 
-#include <stdlib.h> // For exit() and free().
-#include <stdio.h> // For fprintf().
-
 
 /* DATA TYPES */
 
@@ -21,8 +18,8 @@ enum ERR {
     OUT_OF_BOUNDS_VALUE,
     BAD_FILE_OPEN,
     BAD_BUFFER_PROCESS,
-    BAD_FILE_WRITE = -1, // Required for functions that would otherwise return positive int
-    NULL_FUNC_ARG = -2
+    BAD_FILE_WRITE,
+    NULL_FUNC_ARG
 };
 
 

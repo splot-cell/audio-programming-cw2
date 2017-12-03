@@ -8,6 +8,11 @@
 
 #include "filterTests.h"
 
+#include <stdlib.h>
+#include <stdbool.h>
+#include <time.h>
+#include <string.h>
+
 
 /* GLOBALS */
 
@@ -133,11 +138,68 @@ void setCoefficients_calculatesCorrectly( qunittest_t *test ) {
     
     for ( int i = 0; i < order + 1; ++i ) {
         char str[ 100 ];
-        sprintf( str, "Coefficient %d expected:\t%f\tactual:\t%f", i, result[ i ], getCoefficients( filter )[ i ] );
+        sprintf( str, "Even order coef %d expected:\t%f\tactual:\t%f", i, result[ i ], getCoefficients( filter )[ i ] );
         qtest_doubles_equal( result[ i ], getCoefficients( filter )[ i ], 0.00002, str, test );
     }
     
     destroyFilter( filter );
+    
+    
+    const int order2 = 5;
+    firFilter *filter2 = createFilter( order2, g_buf, TYPE_LOWPASS );
+    
+    int x2 = setCoefficients( filter, 44100, 500, WINDOW_RECTANGULAR );
+    
+    qtest_assert_true( x2 == FILT_NO_ERR, "Set coefficients returns 0", test );
+    
+    double result2[ order2 + 1 ] = { 0.0225560563014759, 0.0226326081694584, 0.0226709424408889,
+        0.0226709424408889, 0.0226326081694584, 0.0225560563014759 };
+    
+    for ( int i = 0; i < order2 + 1; ++i ) {
+        char str[ 100 ];
+        sprintf( str, "Odd order coef %d expected:\t%f\tactual:\t%f", i, result2[ i ], getCoefficients( filter2 )[ i ] );
+        qtest_doubles_equal( result2[ i ], getCoefficients( filter2 )[ i ], 0.00002, str, test );
+    }
+    
+    destroyFilter( filter2 );
+}
+
+
+void setCoefficients_highpassCorrect( qunittest_t *test ) {
+    const int order = 8;
+    firFilter *filter = createFilter( order, g_buf, TYPE_HIGHPASS );
+    
+    int x = setCoefficients( filter, 2000, 600, WINDOW_RECTANGULAR );
+    
+    qtest_assert_true( x == FILT_NO_ERR, "Set coefficients returns 0", test );
+    
+    double result[ order + 1 ] = { -0.0756826728640657, 0.0623659522525759, 0.0935489283788639,
+        -0.302730691456263, 0.4, -0.302730691456263, 0.0935489283788639, 0.0623659522525759,
+        -0.0756826728640657 };
+    
+    for ( int i = 0; i < order + 1; ++i ) {
+        char str[ 100 ];
+        sprintf( str, "Highpass coef %d expected:\t%f\tactual:\t%f", i, result[ i ], getCoefficients( filter )[ i ] );
+        qtest_doubles_equal( result[ i ], getCoefficients( filter )[ i ], 0.00002, str, test );
+    }
+    
+    destroyFilter( filter );
+}
+
+
+void setCoefficients_highPassError( qunittest_t *test ) {
+    firFilter *filter = createFilter( 5, g_buf, TYPE_LOWPASS );
+    setFilterType( filter, TYPE_HIGHPASS );
+    firErr x = setCoefficients( filter, 410, 200, WINDOW_RECTANGULAR );
+    qtest_assert_true( x == FILT_TYPE_ERR, "setCoeffs rejects odd-ordered highpass filter", test );
+    destroyFilter( filter );
+}
+
+
+void createFilter_highPassError( qunittest_t *test ) {
+    firFilter *filter = createFilter( 5, g_buf, TYPE_HIGHPASS );
+    qtest_assert_true( filter == NULL, "createFilter rejects odd-ordered highpass filter", test );
+    qtest_assert_true( g_FILT_ERR == FILT_TYPE_ERR, "Sets correct error code", test );
 }
 
 
@@ -217,6 +279,7 @@ void addFilterTests( qtestsuite_t *testsuite ) {
     qunittest_t *coefficientTests = add_qunittest( "Set coefficients", testsuite );
     setCoefficients_calculatesCorrectly( coefficientTests );
     setCoefficients_returnsMinusOne( coefficientTests );
+    setCoefficients_highpassCorrect( coefficientTests );
     
     qunittest_t *windowingTests = add_qunittest( "Window weighting", testsuite );
     bartTests( windowingTests );
@@ -226,4 +289,8 @@ void addFilterTests( qtestsuite_t *testsuite ) {
     
     qunittest_t *processing = add_qunittest( "Processing buffer", testsuite );
     processingTests( processing );
+    
+    qunittest_t *highpass = add_qunittest( "Highpass error testing", testsuite );
+    setCoefficients_highPassError( highpass );
+    createFilter_highPassError( highpass );
 }
