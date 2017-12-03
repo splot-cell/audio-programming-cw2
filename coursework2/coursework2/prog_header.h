@@ -70,9 +70,6 @@ void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions 
 void openFiles( userInput *userData, audioFile **inputFile, audioFile **outputFile );
 
 
-void initFileTracking( void );
-
-
 void errorHandler( int code, char *info );
 
 

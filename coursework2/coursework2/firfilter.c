@@ -291,7 +291,7 @@ firErr filtMemAllocated( void *ptr ) {
         return FILT_MEM_ERR;
     }
     
-    printf( "Wrote pointer %p to filter list\n", ptr ); // For debugging purposes
+//    printf( "Wrote pointer %p to filter list\n", ptr ); // For debugging purposes
     return FILT_NO_ERR;
 }
 
@@ -300,7 +300,7 @@ void freeFiltMemory( void ) {
     void *temp;
     while ( ( temp = filtPop() ) != NULL ) {
         free( temp );
-        printf( "Freed pointer %p from filter list\n", temp ); // Debugging
+//        printf( "Freed pointer %p from filter list\n", temp ); // Debugging
     }
 }
 

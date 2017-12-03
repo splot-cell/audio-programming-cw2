@@ -67,7 +67,7 @@ void memAllocated( void *ptr ) {
         programExit( BAD_MEMORY, "Could not allocate memory for program memory tracking!" );
     }
     
-    printf( "Wrote pointer %p to list\n", ptr ); // For debugging purposes
+//    printf( "Wrote pointer %p to list\n", ptr ); // For debugging purposes
 }
 
 
@@ -75,7 +75,7 @@ void deallocateMem( void ) {
     void *temp;
     while ( ( temp = pop() ) != NULL ) {
         free( temp );
-        printf( "Freed pointer %p from list\n", temp ); // Debugging
+//        printf( "Freed pointer %p from list\n", temp ); // Debugging
     }
 }
 

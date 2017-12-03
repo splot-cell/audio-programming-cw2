@@ -93,12 +93,12 @@ int destroyUserDataStruct( userInput *data ) {
     if ( data == NULL ) {
         return NULL_FUNC_ARG;
     }
-//    if ( data->inputFilename != NULL ) {
-//        free( data->inputFilename );
-//    }
-//    if ( data->outputFilename != NULL ) {
-//        free( data->outputFilename );
-//    }
+    if ( data->inputFilename != NULL ) {
+        free( data->inputFilename );
+    }
+    if ( data->outputFilename != NULL ) {
+        free( data->outputFilename );
+    }
     free( data );
     return NO_ERR;
 }
@@ -114,29 +114,19 @@ void commandLineArgumentHandler( int argc, char *argv[], userInput *userOptions 
         errorHandler( BAD_COMMAND_LINE, "Could not continue, incorrect number of arguments detected." );
     }
     
-//    /* Allocate memory for filnames, adding 7 additional characters for '.wav\0'. */
-//    allocFilenameMem( &userOptions->inputFilename, strlen( argv[ argc - 3 ] ) + 7 );
-//    allocFilenameMem( &userOptions->outputFilename, strlen( argv[ argc - 3 ] ) + 7 );
-//    
-//    strcpy( userOptions->inputFilename, argv[ argc - 3] );
-//    strcpy( userOptions->outputFilename, argv[ argc - 2] );
-    
     /* Required arguments are placed at end of argv by getopt, provided user input was valid. */
-    userOptions->inputFilename = argv[ argc - 3 ];
-    userOptions->outputFilename = argv[ argc - 2 ];
     
-    if ( isWavFilename(userOptions->inputFilename ) == false ) {
-        errorHandler( BAD_FILE_OPEN, "Input filename was not in the format '*.wav'." );
+    /* Allocate memory for filnames, adding additional characters for '.wav\0'. */
+    allocFilenameMem( &userOptions->inputFilename, strlen( argv[ argc - 3 ] ) + 6 );
+    allocFilenameMem( &userOptions->outputFilename, strlen( argv[ argc - 2 ] ) + 6 );
+    
+    strcpy( userOptions->inputFilename, argv[ argc - 3] );
+    strcpy( userOptions->outputFilename, argv[ argc - 2] );
+    
+    if ( wavFilenameHandler( &userOptions->inputFilename, 'i' ) == false ||
+            wavFilenameHandler( &userOptions->outputFilename, 'o' ) == false ) {
+        errorHandler( NO_ERR, "" );
     }
-    
-    if ( isWavFilename(userOptions->outputFilename ) == false ) {
-        errorHandler( BAD_FILE_OPEN, "Output filename was not in the format '*.wav'." );
-    }
-    
-//    if ( wavFilenameHandler( &userOptions->inputFilename, 'i' ) == false ||
-//            wavFilenameHandler( &userOptions->outputFilename, 'o' ) == false ) {
-//        errorHandler( NO_ERR, "" );
-//    }
     
     /* Check characters and range of requested frequency */
     if ( isOnlyPositiveInt( argv[ argc - 1 ] ) == false ) {
@@ -323,7 +313,7 @@ void fileOpened( audioFile *ptr ) {
         programExit( BAD_MEMORY, "Could not allocate memory for open file tracking!" );
     }
     
-    printf( "Wrote pointer %p to file list\n", ptr ); // For debugging purposes
+//    printf( "Wrote pointer %p to file list\n", ptr ); // For debugging purposes
 }
 
 
@@ -331,7 +321,7 @@ void closeOpenFiles( void ) {
     void *temp;
     while ( ( temp = filePop() ) != NULL ) {
         closeAudioFile( temp );
-        printf( "Freed pointer %p from list\n", temp ); // Debugging
+//        printf( "Freed pointer %p from list\n", temp ); // Debugging
     }
 }
 
