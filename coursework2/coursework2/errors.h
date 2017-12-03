@@ -25,9 +25,8 @@ enum ERR {
 
 /* FUNCTION PROTOTYPES */
 
-void initMemTracking( void );
-
-
+/*      memAllocated()
+ * To be called each time program memory is allocated dynamically. Adds <ptr> to linked list. */
 void memAllocated( void *ptr );
 
 

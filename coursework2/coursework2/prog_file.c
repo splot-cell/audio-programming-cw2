@@ -16,6 +16,15 @@
 #include <stdbool.h> // For booleans.
 #include <limits.h> // For converting integers.
 
+
+/* OPEN FILE TRACKING STRUCT */
+
+typedef struct node_struct {
+    audioFile *data;
+    struct node_struct *next;
+} node;
+
+
 /* GLOBAL INITIALISATIONS */
 
 const int g_minFilterFreq = 1;
@@ -26,7 +35,7 @@ const int g_maxBufferSize = 2048;
 const int g_minBufferSize = 64;
 const int g_defaultBufferSize = 128;
 
-static FILE *g_tempFiles;
+static node *g_head = NULL; // For open audioFile tracking.
 
 
 /* PRIVATE FUNCTION PROTOTYPES */
@@ -275,36 +284,62 @@ void allocFilenameMem( char **filename, unsigned long length ) {
 }
 
 
-void initFileTracking( void ) {
-    g_tempFiles = tmpfile();
-    if ( g_tempFiles == NULL ) {
-        filtFreeMem();
-        programExit( BAD_FILE_OPEN, "Error initialising file-tracking temporary file." );
+/* OPEN FILE TRACKING - LINKED LIST FUNCTIONS */
+
+int filePush( audioFile *ptr ) {
+    node *new;
+    new = malloc( sizeof( node ) );
+    if ( new == NULL ) {
+        return 1;
     }
+    new->data = ptr;
+    new->next = g_head;
+    
+    g_head = new;
+    
+    return 0;
+}
+
+
+audioFile* filePop( void ) {
+    audioFile *retVal = NULL;
+    node *next = NULL;
+    
+    if ( g_head == NULL ) {
+        return NULL;
+    }
+    
+    next = g_head->next;
+    retVal = g_head->data;
+    free( g_head );
+    g_head = next;
+    
+    return retVal;
 }
 
 
 void fileOpened( audioFile *ptr ) {
-    fprintf( g_tempFiles, "%p ", ptr );
+    if ( filePush( ptr ) != 0 ) {
+        programExit( BAD_MEMORY, "Could not allocate memory for open file tracking!" );
+    }
+    
+    printf( "Wrote pointer %p to file list\n", ptr ); // For debugging purposes
 }
 
 
 void closeOpenFiles( void ) {
-    rewind( g_tempFiles );
-    audioFile *ptr;
-    
-    while ( fscanf( g_tempFiles, "%p", &ptr ) != EOF ) {
-        closeAudioFile( ptr );
+    void *temp;
+    while ( ( temp = filePop() ) != NULL ) {
+        closeAudioFile( temp );
+        printf( "Freed pointer %p from list\n", temp ); // Debugging
     }
-    
-    fclose( g_tempFiles );
 }
 
 
 void errorHandler( int code, char *info ) {
-    filtFreeMem(); // Prevent memory leaks from filter.
+    freeFiltMemory(); // Prevent memory leaks from filter.
     closeOpenFiles(); // Prevent hanging files.
-    programExit( code, info );
+    programExit( code, info ); // Handles memory leaks from program and exits.
 }
         
 
@@ -346,13 +381,14 @@ void printHelp( void ) {
         "",
         "-->> Optional arguments are now available! <<--",
         "",
-        "In order to use the once-in-a-lifetime HIGHPASS filter mode, please include:",
+        "For optimum results these options should be included before the required",
+        "arguements. Please consult your doctor before use.",
+        "",
+        "In order to use the once-in-a-lifetime HIGHPASS filter mode please include:",
         "",
         "-h",
         "or",
         "--highpass",
-        "",
-        "Before the required arguments.",
         "",
         "To get your hands on some never-seen-before WINDOWING options please use:",
         "",
@@ -368,6 +404,8 @@ void printHelp( void ) {
         "hamm = Hamming window function (This one's a corker! [Henry, 2017])",
         "black = Blackman window function",
         "",
+        "The window specifier should IMMEDIATELY follow the -w or --window flag.",
+        "",
         "And finally, if you're flying with our luxuary package, you may also like",
         "to modify the BUFFER SIZE! Don't worry, no pesky dynamic allocation here!",
         "Simply enter:",
@@ -379,9 +417,11 @@ void printHelp( void ) {
         "With a <desired size> between 64 and 2048 samples! Note, you must use a",
         "power of two. 128 samples is the default, but 256 will blow you away!",
         "",
+        "The desired size should IMMEDIATELY follow the -b or --buffersize flag.",
+        "",
         "References:",
         "",
-        "Henry, Craig, 2017: Personal correspondance with the author."
+        "Henry, Craig, 2017: Personal correspondance with the author"
     };
     printWithBorder( helpText, ( sizeof( helpText ) / sizeof( helpText[ 0 ] ) ), 1 );
     

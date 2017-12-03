@@ -235,7 +235,7 @@ void processingTests( qunittest_t *test ) {
     
     for ( int i = 0; i < order + 1; ++i ) {
         char str[ 100 ];
-        sprintf( str,  "Dirac sample expected: %f actual: %f", coeffs[ i ], inBuffer[ i ] );
+        sprintf( str,  "Dirac sample expected: %f\tactual: %f", coeffs[ i ], inBuffer[ i ] );
         qtest_assert_true( inBuffer[ i ] == coeffs[ i ], str, test );
     }
     
@@ -256,7 +256,7 @@ void processingTests( qunittest_t *test ) {
     
     for ( int i = 0; i < bufSize; ++i ) {
         char str[ 100 ];
-        sprintf( str,  "Dirac sample expected: %f actual: %f", expOutBuf[ i ], inBuffer2[ i ] );
+        sprintf( str,  "Dirac sample expected: %f\tactual: %f", expOutBuf[ i ], inBuffer2[ i ] );
         qtest_assert_true( inBuffer2[ i ] == expOutBuf[ i ], str, test );
     }
     

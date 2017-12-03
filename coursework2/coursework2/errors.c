@@ -8,47 +8,82 @@
 #include "errors.h"
 
 #include <stdlib.h> // For exit() and free().
-#include <stdio.h> // For fprintf().
+#include <stdio.h> // For fprintf() and printf().
+#include <stdbool.h>
 
+/* DYNAMIC MEMORY TRACKING STRUCT */
+
+typedef struct node_struct {
+    void *data;
+    struct node_struct *next;
+} node;
+    
 
 /* GLOBALS */
 
-static FILE *g_temp;
+static node *g_head = NULL;
+
+
+/* DYNAMIC MEMORY TRACKING - LINKED LIST FUNCTIONS */
+
+int push( void *ptr ) {
+    node *new;
+    new = malloc( sizeof( node ) );
+    if ( new == NULL ) {
+        return 1;
+    }
+    new->data = ptr;
+    new->next = g_head;
+    
+    g_head = new;
+    
+    return 0;
+}
+
+
+void* pop( void ) {
+    void *retVal = NULL;
+    node *next = NULL;
+    
+    if ( g_head == NULL ) {
+        return NULL;
+    }
+    
+    next = g_head->next;
+    retVal = g_head->data;
+    free( g_head );
+    g_head = next;
+    
+    return retVal;
+}
 
 
 /* FUNCTION DEFINITIONS */
 
-void initMemTracking( void ) {
-    g_temp = tmpfile();
-    if ( g_temp == NULL ) {
-        fprintf( stderr, "Error initialising program memory temporary file.\n" );
-        exit( BAD_FILE_OPEN );
-    }
-}
-
 
 void memAllocated( void *ptr ) {
-    fprintf( g_temp, "%p ", ptr );
-//    printf( "Wrote pointer %p to temp\n", ptr ); // For debugging purposes
+    
+    if ( push( ptr ) != 0 ) {
+        programExit( BAD_MEMORY, "Could not allocate memory for program memory tracking!" );
+    }
+    
+    printf( "Wrote pointer %p to list\n", ptr ); // For debugging purposes
 }
 
 
 void deallocateMem( void ) {
-    rewind( g_temp );
-    void *ptr;
-    
-    while ( fscanf( g_temp, "%p", &ptr ) != EOF ) {
-//        printf( "Read pointer %p from temp\n", ptr ); // For debugging purposes
-        free( ptr );
+    void *temp;
+    while ( ( temp = pop() ) != NULL ) {
+        free( temp );
+        printf( "Freed pointer %p from list\n", temp ); // Debugging
     }
-    
-    fclose( g_temp );
 }
 
 
 void programExit( int code, char *info ) {
     deallocateMem();
     if ( code != NO_ERR ) {
+        /* Print code as well as message as terminal doesn't show it by default. */
         fprintf( stderr, "ERROR: code %d\n%s\n", code, info );
     }
     exit( code );

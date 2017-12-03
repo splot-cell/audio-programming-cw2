@@ -12,13 +12,6 @@
 
 
 int main( int argc, char * argv[] ) {
-    
-    /* Initialise memory and file tracking. */
-    initMemTracking();
-    if ( initFiltErrHandling() != FILT_NO_ERR ) {
-        programExit( BAD_FILE_OPEN, "Error initialising filter memory temporary file." );
-    }
-    initFileTracking();
 
     if ( argc == 1 ) {
         printHelp();

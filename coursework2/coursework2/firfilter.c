@@ -12,6 +12,14 @@
 #include <math.h> // For sin().
 
 
+/* DYNAMIC MEMORY TRACKING STRUCT */
+
+typedef struct node_struct {
+    void *data;
+    struct node_struct *next;
+} node;
+
+
 /* GLOBALS */
 
 const double g_pi = 3.14159265359;
@@ -19,7 +27,7 @@ const double g_tau = 2 * g_pi;
 
 firErr g_FILT_ERR; // For returning an error from certain functions.
 
-static FILE *g_filtTemp; // For tracking memory usage
+static node *g_head = NULL; // For tracking memory usage
 
 
 /* TYPE DEFINITIONS */
@@ -69,8 +77,8 @@ firFilter* createFilter( int order, double *circularBuffer, filterType type ) {
         g_FILT_ERR = FILT_MEM_ERR;
         return NULL;
     }
-    if ( filtMemAllocated( filter ) != FILT_NO_ERR ) { // Error check file write
-        g_FILT_ERR = FILT_FILE_ERR;
+    if ( filtMemAllocated( filter ) != FILT_NO_ERR ) { // Error check linked list push
+        g_FILT_ERR = FILT_MEM_ERR;
         return NULL;
     }
     
@@ -80,7 +88,7 @@ firFilter* createFilter( int order, double *circularBuffer, filterType type ) {
         return NULL;
     }
     if ( filtMemAllocated( filter->coeffs ) != FILT_NO_ERR ) {
-        g_FILT_ERR = FILT_FILE_ERR;
+        g_FILT_ERR = FILT_MEM_ERR;
         return NULL;
     }
     
@@ -244,36 +252,56 @@ void applyBlackmanWindow( firFilter *filter ) {
 }
 
 
-/* For dynammic memory allocation tracking. */
+/* DYNAMIC MEMORY TRACKING - LINKED LIST FUNCTIONS */
 
-firErr initFiltErrHandling( void ) {
-    g_filtTemp = tmpfile();
-    if ( g_filtTemp == NULL ) {
-        return FILT_FILE_ERR;
+int filtPush( void *ptr ) {
+    node *new;
+    new = malloc( sizeof( node ) );
+    if ( new == NULL ) {
+        return 1;
     }
-    return FILT_NO_ERR;
+    new->data = ptr;
+    new->next = g_head;
+    
+    g_head = new;
+    
+    return 0;
+}
+
+
+void* filtPop( void ) {
+    void *retVal = NULL;
+    node *next = NULL;
+    
+    if ( g_head == NULL ) {
+        return NULL;
+    }
+    
+    next = g_head->next;
+    retVal = g_head->data;
+    free( g_head );
+    g_head = next;
+    
+    return retVal;
 }
 
 
 firErr filtMemAllocated( void *ptr ) {
-    if ( fprintf( g_filtTemp, "%p ", ptr ) < 0 ) {
-        return FILT_FILE_ERR;
+    if ( filtPush( ptr ) != 0 ) {
+        return FILT_MEM_ERR;
     }
-//    printf( "Wrote pointer %p to temp\n", ptr ); // For debugging purposes
+    
+    printf( "Wrote pointer %p to filter list\n", ptr ); // For debugging purposes
     return FILT_NO_ERR;
 }
 
 
-void filtFreeMem( void ) {
-    rewind( g_filtTemp );
-    void *ptr;
-    
-    while ( fscanf( g_filtTemp, "%p", &ptr ) != EOF ) {
-//        printf( "Read pointer %p from temp\n", ptr ); // For debugging purposes
-        free( ptr );
+void freeFiltMemory( void ) {
+    void *temp;
+    while ( ( temp = filtPop() ) != NULL ) {
+        free( temp );
+        printf( "Freed pointer %p from filter list\n", temp ); // Debugging
     }
-    
-    fclose( g_filtTemp );
 }
 
 

@@ -40,8 +40,7 @@ typedef enum FILTER_ERROR_ENUM {
     FILT_MEM_ERR, // Error allocating or accessing memory.
     FILT_ARG_NULL, // Fuction has been passed NULL pointer.
     FILT_OOB_ARG, // Function has been passed an argument out of parameter bounds.
-    FILT_TYPE_ERR, // Error related to selected filter type.
-    FILT_FILE_ERR // Error relating to tempory file for memory handling.
+    FILT_TYPE_ERR // Error related to selected filter type.
 } firErr;
 
 
@@ -92,7 +91,7 @@ firErr initFiltErrHandling( void );
 /*      filtFreeMem()
  * To be used when an error occurs. Will free all dynamically allocated memory related to fir
  * filter variables. */
-void filtFreeMem( void );
+void freeFiltMemory( void );
 
 
 #endif // firfilter_h
