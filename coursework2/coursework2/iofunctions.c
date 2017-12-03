@@ -118,8 +118,7 @@ void printWithBorder( char *message[], int rows, int borderWidth ) {
                 /* If the first character of the row is 'c' set offset to half the available space */
                 if ( message[ r - borderWidth - pad ][ 0 ] == 'c' ) {
                     centreOffset = (int) ( ( numColumns -
-                                            strlen( message[ r - borderWidth - pad ] ) ) / 2 ) - pad - borderWidth;
-                    centreOffset -= fmtChr / 2;
+                                            strlen( message[ r - borderWidth - pad ] ) + fmtChr ) / 2 ) - pad - borderWidth;
 
                 }
                 
