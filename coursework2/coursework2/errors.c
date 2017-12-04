@@ -61,7 +61,6 @@ void* pop( void ) {
 
 /* FUNCTION DEFINITIONS */
 
-
 void memAllocated( void *ptr ) {
     
     if ( push( ptr ) != 0 ) {

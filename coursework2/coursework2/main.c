@@ -5,6 +5,42 @@
 //  Created by Olly Seber on 18/11/2017.
 //
 
+/* Program files structure:
+ *      main.c              = main function
+ *      prog_header.h       = program header, contains program-specific prototypes and globals
+ *      prog_file.c         = program source file, contains program-specific functions
+ *      errors.h/.c         = error handling for the program
+ *      firfilter.h/.c      = fir filter 'library', reusable code
+ *      iofunctions.h/.c    = audio file in/out handling and user input sanitising, reusable
+ *
+ * Dependancy:
+ *      As errors.h is specific to this program, only prog_header.h (and therefore main.c/prog_file.c)
+ *      depend on it. All error calls are therefore made from main.c or prog_file.c
+ *
+ *      firfilter.h and iofunctions.h are both used solely by the main and prog_ files. Therefore
+ *      the dependancy tree does not contain any cyclic-dependancies or cross-dependancies.
+ *
+ * Program structure notes:
+ *      ERRORS:
+ *      When an error is called, the program must exit. To do so gracefully, dynamically allocated
+ *      memory must be freed and any open files must be closed. To do this, three linked lists are
+ *      implemented:
+ *      program dynamic memory  = list stored in errors.c
+ *      filter dynamic memory   = list stored in firfilter.c
+ *      open files              = list stored in prog_file.c
+ *      These lists track the memory allocation and file use, and when an error is called using
+ *      errorHandler(), the memory will be freed and files closed before exit.
+ *
+ *      UNIT TESTS:
+ *      An open source framework "qtest" = https://github.com/inkychris/qtest is used to provide
+ *      some testing. This has been developed by Chris Wright, with some aid from Olly Seber.
+ *      The tests currently cover some of the key filter functions and io functions. Documentation
+ *      of the tests is limited, but they should be fairly self-documenting.
+ *
+ *      All other areas should be documented within the code. Any questions or suggestions should
+ *      be directed to Olly Seber: os00075@surrey.ac.uk.
+ */
+
 #include "prog_header.h" // program header file
 
 #include <stdlib.h>
