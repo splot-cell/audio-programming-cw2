@@ -1,7 +1,7 @@
-# Audio Programming Coursework 2
+# Command line FIR Filter
 Completed as part of the final year *Audio Programming* module on the [Tonmeister](https://www.tonmeister.uk/) course at the University of Surrey.
 
-## Command-line finite impulse reponse filter.
+## Description
 
 This program will apply a low-pass filter to audio from an input wav file and write the result to a specified output wav file.
 
